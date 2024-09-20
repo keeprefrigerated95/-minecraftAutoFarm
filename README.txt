@@ -13,20 +13,21 @@ x: tilled soil with crops planted
 o: water blocks
 H: double chest
 S: charachter starting position
+|: a two block high wall to act as a bumper
 
 All the blocks in this diagram are at the same Z coordinate
 This diagram is viewed from the top, down
 
  oooooooooo
-Sxxxxxxxxxx ---->
-Hxxxxxxxxxx  |
-Hxxxxxxxxxx  |
-Hxxxxxxxxxx  V
- oooooooooo 
-Hxxxxxxxxxx
-Hxxxxxxxxxx
-Hxxxxxxxxxx
-Hxxxxxxxxxx
+|Sxxxxxxxxxx ---->
+|Hxxxxxxxxxx  |
+|Hxxxxxxxxxx  |
+|Hxxxxxxxxxx  V
+| oooooooooo 
+|Hxxxxxxxxxx
+|Hxxxxxxxxxx
+|Hxxxxxxxxxx
+|Hxxxxxxxxxx
  oooooooooo
 
  I would recommend leaving 3 or four unobstructed blocks at the end of each row in case the
