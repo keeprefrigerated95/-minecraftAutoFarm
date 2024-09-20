@@ -10,7 +10,6 @@
 This script assumes that your field will be set up as follows:
 
 x: tilled soil with crops planted
-
 o: water blocks
 H: double chest
 S: charachter starting position
