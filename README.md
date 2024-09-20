@@ -1,5 +1,3 @@
-# -minecraftAutoFarm
-
 ~~~~~~~~~~~~~ Auto Farm ~~~~~~~~~~~~~
  An Auto Hot Key script that will
  harvest and replant a field of
@@ -12,6 +10,7 @@
 This script assumes that your field will be set up as follows:
 
 x: tilled soil with crops planted
+
 o: water blocks
 H: double chest
 S: charachter starting position
@@ -57,11 +56,12 @@ PARAMETERS
 The script reads parameters from the text file autoFarmData, giving you the ability to customize
 the script to your farm layout. These are the following parameters:
 
-sections: A section consists off all the rows inbetween two rows of water. In the diagram above there
+sections: A section consists off the rows inbetween two rows of water. In the diagram above there
 		  are two sections.
-passes: A pass is completed when your character harvests two rows. Divide the number of rows in each
-		section by two to get the number of passes. The number of rows in each section must be the same
-		and must be divisible by 2. In the diagram, each section would need 2 passes.
+passes: A pass is completed when your character harvests two rows. The variable is passes per section. 
+		Divide the number of rows in a single section by two to get the number of passes. The number
+		of rows in each section must be the same and must be divisible by 2. In the diagram, passes would
+		be 2.
 rowLength: The length of each row. In the diagram above, this would be 10. All the rows must have the same
 		   length.
 stepTime: The time in milliseconds that it takes for your character to move one block
