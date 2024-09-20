@@ -1,0 +1,7 @@
+sections:2
+passes:2
+rowLength:10
+stepTime:774
+inventoryX:280
+inventoryY:300
+boxSize:35
