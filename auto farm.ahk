@@ -186,6 +186,7 @@ r::
         loop passes {
             pass(stepTime, rowLength)
             step(stepTime, "s")
+            step(stepTime, "s")
             deposit(inventoryX, invnetoryY, boxSize)
             step(stepTime, "d")
         }
