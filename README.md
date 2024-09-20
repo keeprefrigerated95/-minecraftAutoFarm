@@ -19,7 +19,7 @@ S: charachter starting position
 All the blocks in this diagram are at the same Z coordinate
 This diagram is viewed from the top, down
 
- oooooooooo
+ oooooooooo\n
 Sxxxxxxxxxx ---->
 Hxxxxxxxxxx  |
 Hxxxxxxxxxx  |
