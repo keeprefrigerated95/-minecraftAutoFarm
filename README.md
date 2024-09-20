@@ -112,30 +112,30 @@ the script to your farm layout. These are the following parameters:
 
 sections: A section consists off the rows inbetween two rows of water. In the diagram above there
 
-		  are two sections.
+are two sections.
     
 passes: A pass is completed when your character harvests two rows. The variable is passes per section.
 
-		Divide the number of rows in a single section by two to get the number of passes. The number
+Divide the number of rows in a single section by two to get the number of passes. The number
   
-		of rows in each section must be the same and must be divisible by 2. In the diagram, passes would
+of rows in each section must be the same and must be divisible by 2. In the diagram, passes would
   
-		be 2.
+be 2.
   
 rowLength: The length of each row. In the diagram above, this would be 10. All the rows must have the same
 
-		   length.
+length.
      
 stepTime: The time in milliseconds that it takes for your character to move one block
 
-	while crouching.
+while crouching.
 
  
 inventoryX: The coordinates, relative to the minecraft window, where the upper right inventory tile is located
 
-			when opening a a chest or hopper. The default is set to work with double chests in the default
+when opening a a chest or hopper. The default is set to work with double chests in the default
    
-			minecraft windows size. (not full screen)
+minecraft windows size. (not full screen)
 
    
 boxSize: The length in pixels of each inventory slot
