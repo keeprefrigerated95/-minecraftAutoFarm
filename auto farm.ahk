@@ -3,9 +3,6 @@
  * A script that harvests and replants fields in minecraft
  **********************************************/
 
-
-;CoordMode "Mouse", "Screen"
-
 /* ***********************************************
  * STEP
  * steps the charachter forward a single block
@@ -13,7 +10,6 @@
  * a certain key for
  * key: the key that will be pressed w, a, s or d
  **************************************************/
-
 step(timer, key)
 {
     Send "{Shift down}"
@@ -50,18 +46,26 @@ harvest()
  ***************************************************/
 pass(timer, stepsInRow)
 {
+
+    /*sets the players initial position, using the bumpers*/
+    step(timer, "s")
+    step(timer, "a")
+    step(timer / 10, "d")
+    step(timer / 10, "w")
+    step(timer, "w")
+
     loop stepsInRow {
         step(timer, "w")
         harvest()
     }
-
-    step(timer, "w")
+    
     step(timer, "d")
-            
+
     loop stepsInRow {
-        step(timer, "s")
         harvest()
+        step(timer, "s")
     }
+    step(timer, "s")
 }
 
 /**********************************************
@@ -70,7 +74,6 @@ pass(timer, stepsInRow)
  ***********************************************/
 deposit(x, y, offset) {
     click "Right"
-    count := 1
     xActive := x
     yActive := y
     loop 3 {
@@ -98,6 +101,13 @@ MsgBox "Welcome to Auto Farm! Press R to begin the harvest process. Press X to c
  * works if shift is being used by the script
  ***********************************************/
 x::
+{
+    Send "{Shift up}"
+    MsgBox "Script Cancelled"
+    ExitApp
+}
+
++x::
 {
     Send "{Shift up}"
     MsgBox "Script Cancelled"
@@ -168,7 +178,6 @@ r::
             {
                 invnetoryY := A_LoopField
             }
-
         }
 
         if InStr(A_LoopReadLine, "boxSize")
@@ -185,8 +194,6 @@ r::
     loop sections {
         loop passes {
             pass(stepTime, rowLength)
-            step(stepTime, "s")
-            step(stepTime, "s")
             deposit(inventoryX, invnetoryY, boxSize)
             step(stepTime, "d")
         }
