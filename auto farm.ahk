@@ -36,6 +36,19 @@ harvest()
     return
 }
 
+/************************************************
+* BUMPERSET 
+* centers the charachter on a block using bumpers
+* TIMER: The time needed to take a single step
+*************************************************/
+bumperSet(timer)
+{
+    step(timer, "s")
+    step(timer, "a")
+    step(timer / 8, "d")
+    step(timer / 8, "w")
+}
+
 /**************************************************
  * PASS 
  * Harvests two rows, a full pass
@@ -46,14 +59,6 @@ harvest()
  ***************************************************/
 pass(timer, stepsInRow)
 {
-
-    /*sets the players initial position, using the bumpers*/
-    step(timer, "s")
-    step(timer, "a")
-    step(timer / 10, "d")
-    step(timer / 10, "w")
-    step(timer, "w")
-
     loop stepsInRow {
         step(timer, "w")
         harvest()
@@ -65,12 +70,16 @@ pass(timer, stepsInRow)
         harvest()
         step(timer, "s")
     }
-    step(timer, "s")
+    ;step(timer, "s") ;puts you on top of a chest or hopper
 }
 
 /**********************************************
  * DEPOSIT
  * deposits all items into a chest
+ * X & Y: The x and y coordinates of the top Left
+ *   inventory slot when opening a chest or hopper
+ * OFFSET: the number of pixels the cursor needs to
+     move to go to the next invnetory slot
  ***********************************************/
 deposit(x, y, offset) {
     click "Right"
@@ -193,9 +202,17 @@ r::
     /* implements functions to complete the harvest, storage, and replanting process*/
     loop sections {
         loop passes {
+            bumperSet(stepTime)
+
+            ;moves the character from the bumpers onto a chest
+            step(stepTime, "w")
+
             pass(stepTime, rowLength)
             deposit(inventoryX, invnetoryY, boxSize)
+            
+            ;moves the charachter into the bumpers 
             step(stepTime, "d")
+            step(stepTime, "s")
         }
          step(stepTime, "d")
     }
