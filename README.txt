@@ -39,7 +39,7 @@ forward and back you should still be able to deposit crops in the chest.
 *************************
 The script will make the player harvest and plant crops in a Z pattern.
 
-After running the script, position your character starting position,
+After running the script, position your character in the starting position,
 looking straight down, and facing towards the end of the first row. Make sure
 That they are facing as straight as possible. When ready, press the 'r' key
 to run the harvest process.
@@ -48,8 +48,8 @@ Make sure your inventory is completely empty and that seeds or crops are in your
 You may optionally hold a hoe in your main hand. Nothing from your hot bar will be deposited,
 only items from your inventory.
 
-At any time if you need to kill the script, press the x key. If the shift key gets stuck, just
-click it to reset it.
+At any time if you need to kill the script, press the x key. If the x key doesn't work try 
+pressing shift and then x.
 
 *************************
 PARAMETERS
@@ -58,17 +58,22 @@ The script reads parameters from the text file autoFarmData.txt, giving you the 
 the script to your farm layout. These are the following parameters:
 
 sections: A section consists of the rows in-between two rows of water. In the diagram above there
-		  are two sections.
+          are two sections.
+
 passes: A pass is completed when your character harvests two rows. The variable is passes per section. 
-		Divide the number of rows in a single section by two to get the number of passes. The number
-		of rows in each section must be the same and must be divisible by 2. In the diagram, passes would
-		be 2.
+        Divide the number of rows in a single section by two to get the number of passes. The number
+        of rows in each section must be the same and must be divisible by 2. In the diagram, passes would
+        be 2.
+
 rowLength: The length of each row. In the diagram above, this would be 10. All the rows must have the same length.
+
 stepTime: The time in milliseconds that it takes for your character to move one block while crouching. Due to the
-	granularity of the OS's time-keeping system, the script will typically round this up to the nearest multiple
-	of 10 or 15.6 milliseconds. Essentially, no matter how you adjust this variable, some crops will probably
-	be missed, especially if you have very long rows. The script does it's best to account for this level of
-	unpredictability with the bumpers.
+          granularity of the OS's time-keeping system, the script will typically round this up to the nearest multiple
+          of 10 or 15.6 milliseconds. Essentially, no matter how you adjust this variable, some crops will probably
+          be missed, especially if you have very long rows. The script does it's best to account for this level of
+          unpredictability with the bumpers.
+
 inventoryX & inventoryY: The coordinates, in the Minecraft window, where the upper right inventory tile is located
-			when opening a chest or hopper.
+                         when opening a chest or hopper.
+
 boxSize: The length in pixels of each inventory slot 
