@@ -378,7 +378,6 @@ getCoords()
     xArrayLength := xValues.Length
     loop xArrayLength
     {
-        ;MsgBox xValues.Pop()
         xIn := xIn + (xValues.Pop() * multiplier)
         multiplier := multiplier * 10.0 
     }
@@ -468,8 +467,6 @@ centerPlayer(targetX, targetZ, timer)
     getCoords()
     centered := 0
 
-    ;MsgBox "target X: " targetX "targetZ: " targetZ "xInt: " xInt "zInt: " zInt
-
     ;take the player to the correct coordinates
     while(centered = 0)
     {
@@ -510,27 +507,25 @@ centerPlayer(targetX, targetZ, timer)
 
     while (centered = 0)
     {
-        
-
-        if(XPOS - xRoundedDown < 0.5)
+        if(XPOS - xRoundedDown < 0.4)
         {
             step(timer / 8, POSITIVEX, 1)
             getCoords()
         }
 
-        else if(XPOS - xRoundedDown >= 0.6)
+        else if(XPOS - xRoundedDown > 0.7)
         {
             step(timer / 8, NEGATIVEX, 1)
             getCoords()
         }
 
-        if(ZPOS - zRoundedDown < 0.5)
+        if(ZPOS - zRoundedDown < 0.4)
         {
             step(timer / 8, POSITIVEZ, 1)
             getCoords()
         }
 
-        else if(ZPOS - zRoundedDown >= 0.6)
+        else if(ZPOS - zRoundedDown > 0.7)
         {
             step(timer / 8, NEGATIVEZ, 1)
             getCoords()
@@ -539,7 +534,7 @@ centerPlayer(targetX, targetZ, timer)
         xRoundedDown := Float(Integer(XPOS))
         zRoundedDown := Float(Integer(ZPOS))
 
-        if(XPOS - xRoundedDown >= 0.5 and XPOS - xRoundedDown < 0.6 and ZPOS - zRoundedDown >= 0.5 and ZPOS - zRoundedDown < 0.6)
+        if(XPOS - xRoundedDown >= 0.4 and XPOS - xRoundedDown <= 0.7 and ZPOS - zRoundedDown >= 0.4 and ZPOS - zRoundedDown <= 0.7)
         {
             centered := 1
         }
@@ -733,9 +728,10 @@ r::
     passes := 0
     rowLength := 0
     stepTime := 0
-    inventoryX := 0
+    inventoryX := 267
     invnetoryY := 0
-    boxSize := 0
+    depositContainer := ""
+    boxSize := 35
     windowName := ""
 
 
@@ -774,29 +770,12 @@ r::
             }
         }
 
-        if InStr(A_LoopReadLine, "inventoryX")
+        if InStr(A_LoopReadLine, "depositContainer")
         {
             Loop parse, A_LoopReadLine, ":"
             {
-                inventoryX := A_LoopField
+                depositContainer := A_LoopField
             }
-        }
-
-        if InStr(A_LoopReadLine, "inventoryY")
-        {
-            Loop parse, A_LoopReadLine, ":"
-            {
-                invnetoryY := A_LoopField
-            }
-        }
-
-        if InStr(A_LoopReadLine, "boxSize")
-        {
-            Loop parse, A_LoopReadLine, ":"
-            {
-                boxSize := A_LoopField
-            }
-
         }
 
         if InStr(A_LoopReadLine, "windowName")
@@ -807,6 +786,27 @@ r::
             }
 
         }
+    }
+
+    ;sets proper coordinates for target deposit container
+    if(depositContainer = "single")
+    {
+        inventoryY := 270
+    }
+
+    if(depositContainer = "barrel")
+    {
+        inventoryY := 270
+    }
+
+    if(depositContainer = "double")
+    {
+        inventoryY := 323
+    }
+
+    if(depositContainer = "hopper")
+    {
+        inventoryY := 237
     }
 
     ;sets the window size and opens the minecraft debug menu
@@ -827,7 +827,7 @@ r::
         loop passes {
             pass(stepTime, rowLength)
             centerPlayer(EXPECTEDX, EXPECTEDZ, stepTime)
-            deposit(inventoryX, invnetoryY, boxSize)
+            deposit(inventoryX, inventoryY, boxSize)
             step(stepTime, "d", 1)
             updateSingleStep("d")
         }
