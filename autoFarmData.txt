@@ -1,7 +1,6 @@
 sections:2
-passes:2
-rowLength:10
-stepTime:772
-inventoryX:280
-inventoryY:300
-boxSize:35
+passes:4
+rowLength:1
+stepTime:771
+depositContainer:double
+windowName:Minecraft 1.21.1 - Singleplayer
