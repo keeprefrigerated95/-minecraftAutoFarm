@@ -13,26 +13,23 @@ x: tilled soil with crops planted
 o: water blocks
 H: Hopper/chest/barrel
 S: character starting position
-|: a one, or higher block wall to act as a bumper
 
-All the blocks in this diagram are at the same Z coordinate, with
-the exception of the bumper wall. This diagram is viewed from the top, down
+All the blocks in this diagram are at the same Z coordinate This diagram is viewed from the top, down
 
- |oooooooooo
-|SHxxxxxxxxxx ---->
- |Hxxxxxxxxxx <----
-| Hxxxxxxxxxx ---->
- |Hxxxxxxxxxx <----
- |oooooooooo 
-| Hxxxxxxxxxx |
- |Hxxxxxxxxxx |
-| Hxxxxxxxxxx |
- |Hxxxxxxxxxx V
- |oooooooooo
+ oooooooooo
+Sxxxxxxxxxx ---->
+Hxxxxxxxxxx <----
+Hxxxxxxxxxx ---->
+Hxxxxxxxxxx <----
+ oooooooooo 
+Hxxxxxxxxxx |
+Hxxxxxxxxxx |
+Hxxxxxxxxxx |
+Hxxxxxxxxxx V
+oooooooooo
 
 I would recommend leaving 3 or four unobstructed blocks at the end of each row in case the
-script overshoots. As long as the script is allowed to send your character the same distance
-forward and back you should still be able to deposit crops in the chest.
+script overshoots.
 
 *************************
  CONTROLLING THE SCRIPT
@@ -70,10 +67,9 @@ rowLength: The length of each row. In the diagram above, this would be 10. All t
 stepTime: The time in milliseconds that it takes for your character to move one block while crouching. Due to the
           granularity of the OS's time-keeping system, the script will typically round this up to the nearest multiple
           of 10 or 15.6 milliseconds. Essentially, no matter how you adjust this variable, some crops will probably
-          be missed, especially if you have very long rows. The script does it's best to account for this level of
-          unpredictability with the bumpers.
+          be missed, especially if you have very long rows. The script does it's best to account for this by returning
+          the player to the chest if they got off track while harvesting.
 
-inventoryX & inventoryY: The coordinates, in the Minecraft window, where the upper right inventory tile is located
-                         when opening a chest or hopper.
+depositContainer: the type of container you will be depositing items in. valid types are single, double, hopper, or barrel
 
-boxSize: The length in pixels of each inventory slot 
+windowName: The name of the Minecraft window. This can usually be found in the title bar of the window
