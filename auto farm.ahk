@@ -322,7 +322,6 @@ getCoords()
         else
         {
             numToPush := pixelToNum(whitePixels, xStart, yStart)
-            MsgBox whitePixels
             ;pushes the number that was read to the appropriate array
             if (numToPush != -1)
             {
