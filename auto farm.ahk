@@ -273,7 +273,7 @@ pixelToNum(whitePixels, xStart, yStart)
 getCoords()
 { 
     xStart := 53
-    yStart := 185
+    yStart := 167
     textWidth := 5
     textHeight := 7
     xIsNegative := 1.0
@@ -322,7 +322,7 @@ getCoords()
         else
         {
             numToPush := pixelToNum(whitePixels, xStart, yStart)
-
+            MsgBox whitePixels
             ;pushes the number that was read to the appropriate array
             if (numToPush != -1)
             {
@@ -348,19 +348,20 @@ getCoords()
             xStart := xStart + 12
         }
 
-        ;moves to the next coordinate
+        ;ends the loop
         if(isDecimal = 1 and quitLoop = 2)
         {
             quitLoop := quitLoop + 1
         }
 
+        ;moves to the Z coordinate
         if(isDecimal = 1 and quitLoop = 1)
         {
             quitLoop := quitLoop + 1
             xStart := xStart + 88
         }
 
-
+        ;moves to the Y coordinate
         if(isDecimal = 1 and quitLoop = 0)
         {
             quitLoop := quitLoop + 1
@@ -412,7 +413,7 @@ getCoords()
 getDirection()
 {
     xStart := 81
-    yStart := 243
+    yStart := 225
     textWidth := 5
     textHeight := 7
     direction := ""
@@ -439,7 +440,7 @@ getDirection()
     {
         direction := "w"
     }
-
+    
     return direction
 }
 
