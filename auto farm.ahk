@@ -3,118 +3,10 @@
  * A script that harvests and replants fields in minecraft
  **********************************************/
 
-/************************************************
-* GLOBAL VARIABLES
-************************************************/
-XPOS := 0.0 ;the players x coordinates
-YPOS := 0.0 ;the players y coordinates
-ZPOS := 0.0 ;the players z coordinates
+#Include coordinates.ahk
+#Include direction.ahk
 
-;the players starting position
-XINI := 0
-YINI := 0
-ZINI := 0
-
-;the coordinates the player should be at
-EXPECTEDX := 0
-EXPECTEDY := 0
-EXPECTEDZ := 0
-
-;the direction the player is facing, n, s, e, w
-DIRECTION := ""
-
-;the button that needs to be pressed to go a certain direction
-POSITIVEX := ""
-NEGATIVEX := ""
-POSITIVEZ := ""
-NEGATIVEZ := ""
-
-;sets the coordinate mode to the active client, not the entire window or screen
 CoordMode "Pixel", "Client"
-
-/************************************************
-* SETGLOBALCOORDINATES
-* X, Y, and Z, the current coordinats of the player, which
-* are global variables
-************************************************/
-setGlobalCoordinates(x, y, z)
-{
-    global
-    XPOS := x 
-    YPOS := y 
-    ZPOS := z 
-}
-
-/************************************************
-* SETINITIALCOORDINATES
-* X, Y, and Z, the starting coordinats of the player, which
-* are global variables
-************************************************/
-setInitialCoordinates(x, y, z)
-{
-    global
-    XINI := Integer(x)
-    YINI := Integer(y)
-    ZINI := Integer(z)
-}
-
-/************************************************
-* SETEXPECTEDCOORDS
-* used to set expected coordinate global variables
-* this is where the player is supposed to be, commonly
-* called after the step function
-*************************************************/
-setExpectedCoords(x, y, z)
-{
-    global
-    EXPECTEDX := Integer(x)
-    EXPECTEDY := Integer(y)
-    EXPECTEDZ := Integer(z)
-}
-
-/************************************************
-* SETDIRECTION
-* the direction the player is facing, n, s, e, w
-* sets the global variable
-* also sets global variable for POSITIVE and NEGATIVE globals
-************************************************/
-setDirection(d)
-{
-    global
-    DIRECTION := d
-
-    if(DIRECTION = "n")
-    {
-        POSITIVEX := "d"
-        NEGATIVEX := "a"
-        POSITIVEZ := "s"
-        NEGATIVEZ := "w"
-    }
-
-    if(DIRECTION = "s")
-    {
-        POSITIVEX := "a"
-        NEGATIVEX := "d"
-        POSITIVEZ := "w"
-        NEGATIVEZ := "s"
-    }
-
-    if(DIRECTION = "e")
-    {
-        POSITIVEX := "w"
-        NEGATIVEX := "s"
-        POSITIVEZ := "d"
-        NEGATIVEZ := "a"
-    }
-
-    if(DIRECTION = "w")
-    {
-        POSITIVEX := "s"
-        NEGATIVEX := "w"
-        POSITIVEZ := "a"
-        NEGATIVEZ := "d"
-    }
-}
 
 /* ***********************************************
  * STEP
@@ -126,6 +18,11 @@ setDirection(d)
  **************************************************/
 step(timer, key, numSteps)
 {
+    OutputDebug "`n---------------------------------------------------------------------------------------------------`nSTEP`nINPUT`n"
+    OutputDebug "timer: " timer "`n"
+    OutputDebug "key: " key "`n"
+    OutputDebug "numSteps: " numSteps "`n----------------`n"
+
     loop numSteps
     {
         Send "{Shift down}"
@@ -149,10 +46,14 @@ step(timer, key, numSteps)
 * LENGHT: Length of the target area
 * WIDTH: Width of the target area
 *****************************************************/
-getPixels(x, y, width, height)
+getPixels(firstPixel, width, height)
 {
-    xStart := x
-    yStart := y
+    OutputDebug "`n----------------`nGETPIXELS`nINPUT`n"
+    OutputDebug "firstPixel: " firstPixel.ToString() "`n"
+    OutputDebug "width: " width "`n"
+    OutputDebug "height: " height "`n"
+
+    pixelToRead := Coordinates(firstPixel.x, firstPixel.y, 0)
     whitePixels := 0
 
     ;gets the columns of pixels
@@ -161,17 +62,20 @@ getPixels(x, y, width, height)
         ;gets the rows of pixels
         loop width
         {
-            pixelColor := PixelGetColor(x, y)
+            pixelColor := PixelGetColor(pixelToRead.x, pixelToRead.y)
             if (pixelColor = "0xdddddd")
             {
                 whitePixels := whitePixels + 1
             }
 
-            x := x + 2
+            pixelToRead.x += 2
         }
-        y := y + 2
-        x := xStart
+        pixelToRead.y += 2
+        pixelToRead.x := firstPixel.x
     }
+
+    OutputDebug "OUTPUT`n"
+    OutputDebug "whitePixels: " whitePixels "`n----------------`n"
     return whitePixels
 }
 
@@ -181,14 +85,26 @@ getPixels(x, y, width, height)
 * is a decimal
 * returns 0 if no, 1 if yes
 ************************************************/
-checkIfDecimal(x, y)
+checkIfDecimal(currentSlot)
 {
-    isDecimal := 0
+    OutputDebug "`n----------------`nCHECK IF DECIMAL START`n"
+    OutputDebug "INPUT`n"
+    OutputDebug "currentSlot: " currentSlot.ToString() "`n----------------`n"
 
-    if (getPixels(x - 2, y, 3, 6) = 0 and getPixels(x - 2, y + 12, 3, 1) = 1 and PixelGetColor(x, y + 12) = "0xdddddd")
-        {
-            isDecimal := 1
-        }
+    isDecimal := 0
+    sectionOne := Coordinates(currentSlot.x - 2, currentSlot.y, 0)
+    sectionTwo := Coordinates(currentSlot.x - 2, currentSlot.y + 12, 0)
+    sectionThree := Coordinates(currentSlot.x, currentSlot.y + 12, 0)
+
+    ;if the top section above the pixel is blank, and if there is one pixel on the bottom center
+    if (getPixels(sectionOne, 3, 6) = 0 and getPixels(sectionTwo, 3, 1) = 1 and PixelGetColor(sectionThree.x, sectionThree.y) = "0xdddddd")
+    {
+        isDecimal := 1
+    }
+    
+    OutputDebug "`n----------------`nCHECK IF DECIMAL END`n"
+    OutputDebug "OUTPUT`n"
+    OutputDebug "isDecimal: " isDecimal "`n----------------`n"
     return isDecimal
 }
 
@@ -202,8 +118,12 @@ checkIfDecimal(x, y)
 * is being read, the center of the top left pixel in 
 * the field where it is located (in groups of four pixels)
 ***************************************************/
-pixelToNum(whitePixels, xStart, yStart)
+pixelToNum(whitePixels, topLeftCoords)
 {
+    OutputDebug "`n----------------`nPIXELNOTNUM`nINPUT`n"
+    OutputDebug "whitePixels: " whitePixels "`n"
+    OutputDebug "topLeftCoords: " topLeftCoords.ToString() "`n"
+
     numToPush := -1
 
     ;unique number of pixels
@@ -223,7 +143,7 @@ pixelToNum(whitePixels, xStart, yStart)
     }
 
     ;12 white pixels
-    if (whitePixels = 12 and PixelGetColor(xStart, yStart) = "0xdddddd")
+    if (whitePixels = 12 and PixelGetColor(topLeftCoords.x, topLeftCoords.y) = "0xdddddd")
     {
         numToPush := 7.0
     }
@@ -236,12 +156,12 @@ pixelToNum(whitePixels, xStart, yStart)
 
 
     ;15 white pixels
-    if (whitePixels = 15 and PixelGetColor(xStart + 2, yStart) = "0xdddddd")
+    if (whitePixels = 15 and PixelGetColor(topLeftCoords.x + 2, topLeftCoords.y) = "0xdddddd")
     {
         numToPush := 9.0
     }
 
-    else if (whitePixels = 15 and PixelGetColor(xStart + 8, yStart) = "0xdddddd")
+    else if (whitePixels = 15 and PixelGetColor(topLeftCoords.x + 8, topLeftCoords.y) = "0xdddddd")
     {
         numToPush := 4.0
     }
@@ -252,7 +172,7 @@ pixelToNum(whitePixels, xStart, yStart)
     }
 
     ;17 white pixels
-    if (whitePixels = 17 and PixelGetColor(xStart, yStart) = "0xdddddd")
+    if (whitePixels = 17 and PixelGetColor(topLeftCoords.x, topLeftCoords.y) = "0xdddddd")
     {
         numToPush := 5.0
     }
@@ -262,6 +182,8 @@ pixelToNum(whitePixels, xStart, yStart)
         numToPush := 8.0
     }
 
+    OutputDebug "OUTPUT`n"
+    OutputDebug "numToPush: " numToPush "`n----------------`n"
     return numToPush
 }
 
@@ -272,8 +194,7 @@ pixelToNum(whitePixels, xStart, yStart)
 *****************************************************/
 getCoords()
 { 
-    xStart := 53
-    yStart := 167
+    topLeftCoords := Coordinates(53, 167, 0)
     textWidth := 5
     textHeight := 7
     xIsNegative := 1.0
@@ -283,21 +204,24 @@ getCoords()
     yValues := Array()
     zValues := Array()
 
+    OutputDebug "`n----------------`nGET COORDS START`n"
+    OutputDebug "topLeftCoords: " topLeftCoords.ToString() "`n----------------`n"
+
     /*quit loop 0 assigns the x value
-      1 assigns y, 2 assigns z, 3 quits
-      the loop */
+      1 assigns y, 2 assigns z, 3 quits the loop */
     quitLoop := 0
     while (quitLoop < 3)
     {
         ;check to see if there is a decimal and adjst x coordinate
-        isDecimal := checkIfDecimal(xStart, yStart)
+        isDecimal := checkIfDecimal(topLeftCoords)
         if (isDecimal = 1)
         {
-            xStart := xStart + 4
+            topLeftCoords.x += 4
+            ;OutputDebug "Is Decimal`n"
         }
 
         ;gets the number of pixels in this quadrant
-        whitePixels := getPixels(xStart, yStart, textWidth, textHeight)
+        whitePixels := getPixels(topLeftCoords, textWidth, textHeight)
 
         ;check if the coordinate is a negative symbol
         if (whitePixels = 5)
@@ -321,7 +245,7 @@ getCoords()
         ;if not a negative symbol, figures out which number is being read, if any
         else
         {
-            numToPush := pixelToNum(whitePixels, xStart, yStart)
+            numToPush := pixelToNum(whitePixels, topLeftCoords)
             ;pushes the number that was read to the appropriate array
             if (numToPush != -1)
             {
@@ -344,7 +268,8 @@ getCoords()
         ;moves to the next number in the row
         if(isDecimal = 0)
         {
-            xStart := xStart + 12
+            ;xStart := xStart + 12
+            topLeftCoords.x += 12
         }
 
         ;ends the loop
@@ -357,16 +282,17 @@ getCoords()
         if(isDecimal = 1 and quitLoop = 1)
         {
             quitLoop := quitLoop + 1
-            xStart := xStart + 88
+            ;xStart := xStart + 88
+            topLeftCoords.x += 88
         }
 
         ;moves to the Y coordinate
         if(isDecimal = 1 and quitLoop = 0)
         {
             quitLoop := quitLoop + 1
-            xStart := xStart + 64
+            ;xStart := xStart + 64
+            topLeftCoords.x += 64
         }
-       
     }
     
     ;converts the arrays to floats and saves to global variable
@@ -401,7 +327,12 @@ getCoords()
     }
     zIn := zIn * zIsNegative
 
-    setGlobalCoordinates(xIn, yIn, zIn)
+    output := Coordinates(xIn, yIn, zIn)
+
+    OutputDebug "`n----------------`nGETCOORDS END`n"
+    OutputDebug "OUTPUT`n"
+    OutputDebug "output coordinates: " output.ToString() "`n----------------`n"
+    return output
 }
 
 /*************************************************
@@ -411,14 +342,15 @@ getCoords()
 *************************************************/
 getDirection()
 {
-    xStart := 81
-    yStart := 225
+    topLeftCoords := Coordinates(81, 225, 0)
     textWidth := 5
     textHeight := 7
     direction := ""
 
+    OutputDebug "`n----------------`nGETDIRECTION`n"
+
     ;gets the number of pixels in this quadrant
-    whitePixels := getPixels(xStart, yStart, textWidth, textHeight)
+    whitePixels := getPixels(topLeftCoords, textWidth, textHeight)
 
     if (whitePixels = 12)
     {
@@ -440,6 +372,8 @@ getDirection()
         direction := "w"
     }
     
+    OutputDebug "OUTPUT`n"
+    OutputDebug "direction: " direction "`n----------------`n"
     return direction
 }
 
@@ -461,40 +395,43 @@ harvest()
 * centers the player on the target coordinates
 * targetX & targetZ: the target coordinates
 **************************************************/
-centerPlayer(targetX, targetZ, timer)
+centerPlayer(targetCoords, timer, facingData)
 {
+    OutputDebug "`n----------------`nCENTER PLAYER`nINPUT`n"
+    OutputDebug "targetCoords: " targetCoords.ToString() "`n----------------`n"
+
     ;sets the current coordinates
-    getCoords()
+    currentCoords := getCoords()
     centered := 0
 
     ;take the player to the correct coordinates
     while(centered = 0)
     {
-        if(Integer(targetX) > Integer(XPOS))
+        if(Integer(targetCoords.x) > Integer(currentCoords.x))
         {
-            step(timer, POSITIVEX, Integer(targetX) - Integer(XPOS))
-            getCoords()
+            step(timer, facingData.positiveX, Integer(targetCoords.x) - Integer(currentCoords.x))
+            currentCoords := getCoords()
         }
 
-        else if(Integer(targetX) < Integer(XPOS))
+        else if(Integer(targetCoords.x) < Integer(currentCoords.x))
         {
-            step(timer, NEGATIVEX, Integer(XPOS) - Integer(targetX))
-            getCoords()
+            step(timer, facingData.negativeX, Integer(currentCoords.x) - Integer(targetCoords.x))
+            currentCoords := getCoords()
         }
 
-        if(Integer(targetZ) > Integer(ZPOS))
+        if(Integer(targetCoords.z) > Integer(currentCoords.z))
         {
-            step(timer, POSITIVEZ, Integer(targetZ) - Integer(ZPOS))
-            getCoords()
+            step(timer, facingData.positiveZ, Integer(targetCoords.z) - Integer(currentCoords.z))
+            currentCoords := getCoords()
         }
 
-        else if(Integer(targetZ) < Integer(ZPOS))
+        else if(Integer(targetCoords.z) < Integer(currentCoords.z))
         {
-            step(timer, NEGATIVEZ, Integer(ZPOS) - Integer(targetZ))
-            getCoords()
+            step(timer, facingData.negativeZ, Integer(targetCoords.z) - Integer(targetCoords.z))
+            currentCoords := getCoords()
         }
 
-        if(Integer(XPOS) = Integer(targetX) and Integer(ZPOS) = Integer(targetZ))
+        if(Integer(currentCoords.x) = Integer(targetCoords.x) and Integer(currentCoords.z) = Integer(targetCoords.z))
         {
             centered := 1
         }
@@ -502,41 +439,36 @@ centerPlayer(targetX, targetZ, timer)
 
     ;centers the player on the block itself
     centered := 0
-    xRoundedDown := Float(Integer(XPOS))
-    zRoundedDown := Float(Integer(ZPOS))
-
+    roundedDown := Coordinates(Float(Integer(currentCoords.x)), Float(Integer(currentCoords.y)), Float(Integer(currentCoords.z)))
     while (centered = 0)
     {
-        if(XPOS - xRoundedDown < 0.4)
-        {
-            step(timer / 8, POSITIVEX, 1)
-            getCoords()
-        }
-
-        else if(XPOS - xRoundedDown > 0.7)
-        {
-            step(timer / 8, NEGATIVEX, 1)
-            getCoords()
-        }
-
-        if(ZPOS - zRoundedDown < 0.4)
-        {
-            step(timer / 8, POSITIVEZ, 1)
-            getCoords()
-        }
-
-        else if(ZPOS - zRoundedDown > 0.7)
-        {
-            step(timer / 8, NEGATIVEZ, 1)
-            getCoords()
-        }
-
-        xRoundedDown := Float(Integer(XPOS))
-        zRoundedDown := Float(Integer(ZPOS))
-
-        if(XPOS - xRoundedDown >= 0.4 and XPOS - xRoundedDown <= 0.7 and ZPOS - zRoundedDown >= 0.4 and ZPOS - zRoundedDown <= 0.7)
+        if(Abs(currentCoords.x - roundedDown.x) >= 0.3 and Abs(currentCoords.x - roundedDown.x) <= 0.7 and Abs(currentCoords.z - roundedDown.z) >= 0.3 and Abs(currentCoords.z - roundedDown.z) <= 0.7)
         {
             centered := 1
+        }
+
+        else if(currentCoords.x - roundedDown.x < 0.3 and currentCoords.x - 0.3 >= 0 or currentCoords.x - roundedDown.x < -0.7)
+        {
+            step(timer / 8, facingData.positiveX, 1)
+            currentCoords := getCoords()
+        }
+
+        else if(currentCoords.x - roundedDown.x > 0.7 or currentCoords.x - roundedDown.x > -0.3 and currentCoords.x - roundedDown.x <= 0)
+        {
+            step(timer / 8, facingData.negativeX, 1)
+            currentCoords := getCoords()
+        }
+
+        else if(currentCoords.z - roundedDown.z < 0.3 and currentCoords.z - 0.3 >= 0 or currentCoords.z - roundedDown.z < -0.7)
+        {
+            step(timer / 8, facingData.positiveZ, 1)
+            currentCoords := getCoords()
+        }
+
+        else if(currentCoords.z - roundedDown.z > 0.7 or currentCoords.z - roundedDown.z > -0.3 and currentCoords.z - roundedDown.z <= 0)
+        {
+            step(timer / 8, facingData.negativeZ, 1)
+            currentCoords := getCoords()
         }
     }
 }
@@ -546,99 +478,30 @@ centerPlayer(targetX, targetZ, timer)
 * updates the expected location by one step depending
 * on the input, w a s or d
 ********************************************/
-updateSingleStep(keyPress)
+updateSingleStep(keyPress, currentCoords, facingData)
 {
-    if(DIRECTION = "n")
+
+    if(facingData.positiveX = keyPress)
     {
-        if(keyPress = "w")
-        {
-            setExpectedCoords(EXPECTEDX, EXPECTEDY, EXPECTEDZ - 1)
-        }
-
-        if(keyPress = "a")
-        {
-            setExpectedCoords(EXPECTEDX - 1, EXPECTEDY, EXPECTEDZ)
-        }
-
-        if(keyPress = "s")
-        {
-            setExpectedCoords(EXPECTEDX, EXPECTEDY, EXPECTEDZ + 1)
-        }
-
-        if(keyPress = "d")
-        {
-            setExpectedCoords(EXPECTEDX + 1, EXPECTEDY, EXPECTEDZ)
-        }
+        currentCoords.x += 1
     }
 
-    if(DIRECTION = "s")
+    else if (facingData.negativeX = keyPress)
     {
-        if(keyPress = "w")
-        {
-            setExpectedCoords(EXPECTEDX, EXPECTEDY, EXPECTEDZ + 1)
-        }
-
-        if(keyPress = "a")
-        {
-            setExpectedCoords(EXPECTEDX + 1, EXPECTEDY, EXPECTEDZ)
-        }
-
-        if(keyPress = "s")
-        {
-            setExpectedCoords(EXPECTEDX, EXPECTEDY, EXPECTEDZ - 1)
-        }
-
-        if(keyPress = "d")
-        {
-            setExpectedCoords(EXPECTEDX - 1, EXPECTEDY, EXPECTEDZ)
-        }
+        currentCoords.x -= 1
     }
 
-    if(DIRECTION = "e")
+    else if (facingData.positiveZ = keyPress)
     {
-        if(keyPress = "w")
-        {
-            setExpectedCoords(EXPECTEDX + 1, EXPECTEDY, EXPECTEDZ)
-        }
-
-        if(keyPress = "a")
-        {
-            setExpectedCoords(EXPECTEDX, EXPECTEDY, EXPECTEDZ - 1)
-        }
-
-        if(keyPress = "s")
-        {
-            setExpectedCoords(EXPECTEDX - 1, EXPECTEDY, EXPECTEDZ)
-        }
-
-        if(keyPress = "d")
-        {
-            setExpectedCoords(EXPECTEDX, EXPECTEDY, EXPECTEDZ + 1)
-        }
+        currentCoords.z += 1
     }
 
-    if(DIRECTION = "w")
+    else if (facingData.negativeZ = keyPress)
     {
-        if(keyPress = "w")
-        {
-            setExpectedCoords(EXPECTEDX - 1, EXPECTEDY, EXPECTEDZ)
-        }
-
-        if(keyPress = "a")
-        {
-            setExpectedCoords(EXPECTEDX, EXPECTEDY, EXPECTEDZ + 1)
-        }
-
-        if(keyPress = "s")
-        {
-            setExpectedCoords(EXPECTEDX + 1, EXPECTEDY, EXPECTEDZ)
-        }
-
-        if(keyPress = "d")
-        {
-            setExpectedCoords(EXPECTEDX, EXPECTEDY, EXPECTEDZ - 1)
-        }
+        currentCoords.z -= 1
     }
+
+    return currentCoords
 }
 
 /**************************************************
@@ -649,22 +512,24 @@ updateSingleStep(keyPress)
  * STEPSINROW: the number of steps needed to reach the
  *    end of one row
  ***************************************************/
-pass(timer, stepsInRow)
+pass(timer, stepsInRow, currentPos, facingData)
 {
     loop stepsInRow {
         step(timer, "w", 1)
-        updateSingleStep("w")
+        currentPos := updateSingleStep("w", currentPos, facingData)
         harvest()
     }
     
     step(timer, "d", 1)
-    updateSingleStep("d")
+    currentPos := updateSingleStep("d", currentPos, facingData)
 
     loop stepsInRow {
         harvest()
         step(timer, "s", 1)
-        updateSingleStep("s")
+        currentPos := updateSingleStep("s", currentPos, facingData)
     }
+
+    return currentPos
 }
 
 /**********************************************
@@ -675,23 +540,22 @@ pass(timer, stepsInRow)
  * OFFSET: the number of pixels the cursor needs to
      move to go to the next invnetory slot
  ***********************************************/
-deposit(x, y, offset) {
+deposit(topLeftInv, offset) {
     click "Right"
-    xActive := x
-    yActive := y
+    cursorCoords := topLeftInv
     loop 3 {
         loop 9 {
             Send "{Shift down}"
             sleep 200
-            click xActive, yActive
+            click cursorCoords.x, cursorCoords.y
             sleep 200
             Send "{Shift up}"
             sleep 200
             
-            xActive := xActive + offset
+            cursorCoords.x += offset
         }
-        yActive := yActive + offset
-        xActive := x
+        cursorCoords.y += offset
+        cursorCoords.x := topLeftInv.x
     }
     send "{Escape}"
 }
@@ -728,7 +592,6 @@ r::
     passes := 0
     rowLength := 0
     stepTime := 0
-    inventoryX := 267
     invnetoryY := 0
     depositContainer := ""
     boxSize := 35
@@ -788,6 +651,7 @@ r::
         }
     }
 
+    inventoryX := 267
     ;sets proper coordinates for target deposit container
     if(depositContainer = "single")
     {
@@ -809,30 +673,36 @@ r::
         inventoryY := 237
     }
 
+    invCoords := Coordinates(inventoryX, inventoryY, 0)
+
     ;sets the window size and opens the minecraft debug menu
     WinMove 0, 0, 854, 560, windowName
     sleep 50
     send "{F3}"
     sleep 50
 
-    ;gets the players current coordinates, saves them to the initial coordinates and direction
-    getCoords()
-    setInitialCoordinates(XPOS, YPOS, ZPOS)
-    setDirection(getDirection())
-    setExpectedCoords(XPOS, YPOS, ZPOS)
-    centerPlayer(XPOS, ZPOS, stepTime)
+    ;coordinates where the player starts
+    initialCoords := getCoords()
+
+    /*keeps track of where the player should be
+    (prevents overuse of getCoords function becuase it's slow)*/
+    expectedCoords := initialCoords
+    facingData := Direction(getDirection(),,,,)
     
+    ;center player on the block they are standing on
+    centerPlayer(initialCoords, stepTime, facingData)
+
     /* implements functions to complete the harvest, storage, and replanting process*/
     loop sections {
         loop passes {
-            pass(stepTime, rowLength)
-            centerPlayer(EXPECTEDX, EXPECTEDZ, stepTime)
-            deposit(inventoryX, inventoryY, boxSize)
+            expectedCoords := pass(stepTime, rowLength, expectedCoords, facingData)
+            centerPlayer(expectedCoords, stepTime, facingData)
+            deposit(invCoords, boxSize)
             step(stepTime, "d", 1)
-            updateSingleStep("d")
+            updateSingleStep("d", expectedCoords, facingData)
         }
          step(stepTime, "d", 1)
-         updateSingleStep("d")
+         updateSingleStep("d", expectedCoords, facingData)
     }
     MsgBox "Harvest Complete OwO"
     ExitApp
