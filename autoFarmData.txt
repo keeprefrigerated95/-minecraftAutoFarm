@@ -1,6 +1,6 @@
-sections:2
+sections:7
 passes:4
-rowLength:1
+rowLength:72
 stepTime:771
 depositContainer:double
-windowName:Minecraft 1.21.1 - Singleplayer
+windowName:Minecraft 1.21.1 - Multiplayer (3rd-party Server)
