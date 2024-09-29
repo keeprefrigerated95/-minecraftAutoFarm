@@ -1,5 +1,5 @@
 sections:7
-passes:4
+rowsPerSection:8
 rowLength:72
 stepTime:771
 depositContainer:double
