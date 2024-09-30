@@ -547,6 +547,7 @@ centerPlayer(targetCoords, timer, facingData, xyzCoords)
 
     while(centered = 0)
     {
+        /*
         if(targetCoords.x > currentCoords.x and targetCoords.x - currentCoords.x > 0.5)
         {
             step(timer, facingData.positiveX, Integer(targetCoords.x) - Integer(currentCoords.x))
@@ -592,6 +593,35 @@ centerPlayer(targetCoords, timer, facingData, xyzCoords)
         }
 
         if(xIsCentered = 1 and zIsCentered = 1)
+        {
+            centered := 1
+        }
+        */
+        if(Integer(targetCoords.x) > Integer(currentCoords.x))
+        {
+            step(timer, facingData.positiveX, Integer(targetCoords.x) - Integer(currentCoords.x))
+            currentCoords := getCoords(xyzCoords)
+        }
+
+        else if(Integer(targetCoords.x) < Integer(currentCoords.x))
+        {
+            step(timer, facingData.negativeX, Integer(currentCoords.x) - Integer(targetCoords.x))
+            currentCoords := getCoords(xyzCoords)
+        }
+
+        if(Integer(targetCoords.z) > Integer(currentCoords.z))
+        {
+            step(timer, facingData.positiveZ, Integer(targetCoords.z) - Integer(currentCoords.z))
+            currentCoords := getCoords(xyzCoords)
+        }
+        
+        else if(Integer(targetCoords.z) < Integer(currentCoords.z))
+        {
+            step(timer, facingData.negativeZ, Integer(currentCoords.z) - Integer(targetCoords.z))
+            currentCoords := getCoords(xyzCoords)
+        }
+
+        if(Integer(targetCoords.x) = Integer(currentCoords.x) and Integer(targetCoords.z) = Integer(currentCoords.z))
         {
             centered := 1
         }
@@ -834,8 +864,11 @@ r::
     loop sections {
         sectionsCount += 1
         rowCount := 0
+        OutputDebug "starting section " sectionsCount "`n"
         loop rowsPerSection {
             rowCount += 1
+
+            OutputDebug "harvesting row " rowCount "`n"
 
             ;harvests one row
             loop rowLength {
@@ -851,6 +884,7 @@ r::
             ;takes player back to the beginning of the row
             centerPlayer(currentRowCoords, stepTime, facingData, xyzCoords)
         
+            OutputDebug "depositing items`n"
             ;deposits items into the chest
             click "Right"
             cursorCoords := Coordinates(topLeftInv.x, topLeftInv.y, topLeftInv.z)
@@ -869,7 +903,7 @@ r::
                 cursorCoords := Coordinates(topLeftInv.x, cursorCoords.y + boxSize, 0)
             }
             Send "{Escape}"
-
+            OutputDebug "items deposited`n"
             ;takes player to beginning of next row
             currentRowCoords := getNextRow(currentRowCoords, facingData)
             centerPlayer(currentRowCoords, stepTime, facingData, xyzCoords)
