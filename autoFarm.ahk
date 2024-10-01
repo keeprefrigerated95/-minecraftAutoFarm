@@ -887,6 +887,7 @@ r::
             OutputDebug "depositing items`n"
             ;deposits items into the chest
             click "Right"
+            sleep 1000
             cursorCoords := Coordinates(topLeftInv.x, topLeftInv.y, topLeftInv.z)
             loop 3
             {
