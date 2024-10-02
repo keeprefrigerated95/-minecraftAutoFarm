@@ -9,14 +9,14 @@
 CoordMode "Pixel", "Client"
 
 /* ***********************************************
- * STEP
- * steps the charachter forward a single block
+ * sneak
+ * moves player while sneaking aka crouching
  * timer: how many milliseconds the script will press
  * a certain key for
  * key: the key that will be pressed w, a, s or d
  * numSteps: the number of steps that will be taken
  **************************************************/
-step(timer, key, numSteps)
+sneak(timer, key, numSteps)
 {
     ;OutputDebug "`n------------`nSTEP`nINPUT`n"
     ;OutputDebug "timer: " timer "`n"
@@ -39,7 +39,23 @@ step(timer, key, numSteps)
         Send "{Shift up}"
         sleep 100
     }
+
     return
+}
+
+/*******************************************************
+ * WALK
+ * walks the player
+ * timer: how long each step takes
+ * key: the key that will be presses, w, a, s, or d
+ * numSteps: the number of steps that will be taken
+ *******************************************************/
+walk(timer, key, numSteps)
+{
+    Send "{" key " down}"
+    sleep timer * numSteps
+    Send "{" key " up}"
+    sleep 100
 }
 
 /****************************************************
@@ -478,7 +494,7 @@ getDirection(xyzCoords)
  ****************************************************/
 centerCoordinates(inputCoords)
 {
-    OutputDebug "`n-----------------`nCENTER COORDINATES`ninputCoords: " inputCoords.ToString() "`n"
+    ;OutputDebug "`n-----------------`nCENTER COORDINATES`ninputCoords: " inputCoords.ToString() "`n"
 
     outputCoords := Coordinates()
     roundedX := 0.0
@@ -524,7 +540,8 @@ centerCoordinates(inputCoords)
     }
 
     outputCoords := Coordinates(centeredX, centeredY, centeredZ)
-    OutputDebug "outputCoords: " outputCoords.ToString() "`n-------------------`n"
+
+    ;OutputDebug "outputCoords: " outputCoords.ToString() "`n-------------------`n"
 
     return outputCoords
 }
@@ -534,7 +551,7 @@ centerCoordinates(inputCoords)
 * centers the player on the target coordinates
 * targetX & targetZ: the target coordinates
 **************************************************/
-centerPlayer(targetCoords, timer, facingData, xyzCoords)
+centerPlayer(targetCoords, sneakTimer, walkTimer, facingData, xyzCoords)
 {
 
     ;sets the current coordinates
@@ -544,33 +561,34 @@ centerPlayer(targetCoords, timer, facingData, xyzCoords)
     centered := 0
     zIsCentered := 0
     xIsCentered := 0
-    OutputDebug "`n----------------`nCENTER PLAYER`nINPUT`n"
-    OutputDebug "targetCoords: " targetCoords.ToString() "`ncurrentCoordinates: " currentCoords.ToString() "`n"
+
+    ;OutputDebug "`n----------------`nCENTER PLAYER`nINPUT`n"
+    ;OutputDebug "targetCoords: " targetCoords.ToString() "`ncurrentCoordinates: " currentCoords.ToString() "`n"
 
     ;take the player to the correct coordinates
     while(centered = 0)
     {
         if(targetCoords.x > currentCoordsCenter.x)
         {
-            step(timer, facingData.positiveX, targetCoords.x - currentCoordsCenter.x)
+            walk(walkTimer, facingData.positiveX, targetCoords.x - currentCoordsCenter.x)
             currentCoords := getCoords(xyzCoords)
         }
     
         else if(targetCoords.x < currentCoordsCenter.x)
         {
-            step(timer, facingData.negativeX, currentCoordsCenter.x - targetCoords.x)
+            walk(walkTimer, facingData.negativeX, currentCoordsCenter.x - targetCoords.x)
             currentCoords := getCoords(xyzCoords)
         }
     
         if(targetCoords.z > currentCoordsCenter.z)
         {
-            step(timer, facingData.positiveZ, targetCoords.z - currentCoordsCenter.z)
+            walk(walkTimer, facingData.positiveZ, targetCoords.z - currentCoordsCenter.z)
             currentCoords := getCoords(xyzCoords)
         }
             
         else if(targetCoords.z < currentCoordsCenter.z)
         {
-            step(timer, facingData.negativeZ, currentCoordsCenter.z - targetCoords.z)
+            walk(walkTimer, facingData.negativeZ, currentCoordsCenter.z - targetCoords.z)
             currentCoords := getCoords(xyzCoords)
         }
 
@@ -582,13 +600,13 @@ centerPlayer(targetCoords, timer, facingData, xyzCoords)
         }
     }
     
-    OutputDebug "Arrived at block`n"
+    ;OutputDebug "Arrived at block`n"
     
     ;centers the player on the block itself
     centered := 0
     roundedDown := Coordinates(Float(Integer(currentCoords.x)), Float(Integer(currentCoords.y)), Float(Integer(currentCoords.z)))
     
-    OutputDebug "centering on block`nroundedDown: " roundedDown.ToString() "`n"
+    ;OutputDebug "centering on block`nroundedDown: " roundedDown.ToString() "`n"
     
     while (centered = 0)
     {
@@ -599,25 +617,25 @@ centerPlayer(targetCoords, timer, facingData, xyzCoords)
     
         else if(currentCoords.x - roundedDown.x < 0.3 and currentCoords.x - 0.3 >= 0 or currentCoords.x - roundedDown.x < -0.7)
         {
-            step(timer / 8, facingData.positiveX, 1)
+            sneak(sneakTimer / 8, facingData.positiveX, 1)
             currentCoords := getCoords(xyzCoords)
         }
     
         else if(currentCoords.x - roundedDown.x > 0.7 or currentCoords.x - roundedDown.x > -0.3 and currentCoords.x - roundedDown.x <= 0)
         {
-            step(timer / 8, facingData.negativeX, 1)
+            sneak(sneakTimer / 8, facingData.negativeX, 1)
             currentCoords := getCoords(xyzCoords)
         }
     
         else if(currentCoords.z - roundedDown.z < 0.3 and currentCoords.z - 0.3 >= 0 or currentCoords.z - roundedDown.z < -0.7)
         {
-            step(timer / 8, facingData.positiveZ, 1)
+            sneak(sneakTimer / 8, facingData.positiveZ, 1)
             currentCoords := getCoords(xyzCoords)
         }
     
         else if(currentCoords.z - roundedDown.z > 0.7 or currentCoords.z - roundedDown.z > -0.3 and currentCoords.z - roundedDown.z <= 0)
         {
-            step(timer / 8, facingData.negativeZ, 1)
+            sneak(sneakTimer / 8, facingData.negativeZ, 1)
             currentCoords := getCoords(xyzCoords)
         }
     }
@@ -638,197 +656,223 @@ getNextRow(currentRow, facingData)
      
     if(facingData.cardinalDir = "n")
     {
-            nextRowCoords := Coordinates(currentRow.x + 1, currentRow.y, currentRow.z)
-        }
-    
-        if(facingData.cardinalDir = "s")
-        {
-            nextRowCoords := Coordinates(currentRow.x - 1, currentRow.y, currentRow.z)
-        }
-    
-        if(facingData.cardinalDir = "e")
-        {
-            nextRowCoords := Coordinates(currentRow.x, currentRow.y, currentRow.z + 1)
-        }
-    
-        if(facingData.cardinalDir = "w")
-        {
-            nextRowCoords := Coordinates(currentRow.x, currentRow.y, currentRow.z - 1)
-        }
-    
-        ;OutputDebug "nextRowCoords: " nextRowCoords.ToString() "`n------------------`n"
-        return centerCoordinates(nextRowCoords)
+        nextRowCoords := Coordinates(currentRow.x + 1, currentRow.y, currentRow.z)
     }
     
-    MsgBox "Welcome to Auto Farm! Press R to begin the harvest process. Press X to cancel at any time :3 You may close this window "
-    
-    /**********************************************
-     * X HOTKEY
-     * Press 'x' to cancel the script at any time
-     * works if shift is being used by the script
-     ***********************************************/
-    x::
+    if(facingData.cardinalDir = "s")
     {
-        Send "{Shift up}"
-        MsgBox "Script Cancelled"
-        ExitApp
+        nextRowCoords := Coordinates(currentRow.x - 1, currentRow.y, currentRow.z)
     }
     
-    +x::
+    if(facingData.cardinalDir = "e")
     {
-        Send "{Shift up}"
-        MsgBox "Script Cancelled"
-        ExitApp
+        nextRowCoords := Coordinates(currentRow.x, currentRow.y, currentRow.z + 1)
     }
     
-    
-    /**********************************************
-     * R HOTKEY
-     * Press 'R' to run the farming process
-     ***********************************************/
-    r::
+    if(facingData.cardinalDir = "w")
     {
-        ;variables read from autoFarmData.txt
-        sections := 0
-        rowsPerSection := 0
-        rowLength := 0
-        stepTime := 0
-        depositContainer := ""
-        windowName := ""
+        nextRowCoords := Coordinates(currentRow.x, currentRow.y, currentRow.z - 1)
+    }
     
-        /* reads and loads data from the autoFarmData.txt file */
-        Loop read, "autoFarmData.txt"
+    ;OutputDebug "nextRowCoords: " nextRowCoords.ToString() "`n------------------`n"
+    return centerCoordinates(nextRowCoords)
+}
+    
+MsgBox "Welcome to Auto Farm! Press R to begin the harvest process. Press X to cancel at any time :3 You may close this window "
+    
+/**********************************************
+* X HOTKEY
+* Press 'x' to cancel the script at any time
+* works if shift is being used by the script
+***********************************************/
+x::
+{
+    Send "{Shift up}"
+    MsgBox "Script Cancelled"
+    ExitApp
+}
+    
++x::
+{
+    Send "{Shift up}"
+    MsgBox "Script Cancelled"
+    ExitApp
+}
+    
+    
+/**********************************************
+* R HOTKEY
+* Press 'R' to run the farming process
+***********************************************/
+r::
+{
+    ;variables read from autoFarmData.txt
+    layers := 0
+    sectionsPerLayer := 0
+    rowsPerSection := 0
+    rowLength := 0
+    sneakTime := 0
+    walkTime := 0
+    depositContainer := ""
+    windowName := ""
+    
+    /* reads and loads data from the autoFarmData.txt file */
+    Loop read, "autoFarmData.txt"
+    {
+        if InStr(A_LoopReadLine, "layers")
         {
-            if InStr(A_LoopReadLine, "sections")
+            Loop parse, A_LoopReadLine, ":"
             {
-                Loop parse, A_LoopReadLine, ":"
-                {
-                    sections := A_LoopField
-                }
+                layers := A_LoopField
             }
-    
-            if InStr(A_LoopReadLine, "rowsPerSection")
-            {
-                Loop parse, A_LoopReadLine, ":"
-                {
-                    rowsPerSection := A_LoopField
-                }
-            }
-    
-            if InStr(A_LoopReadLine, "rowLength")
-            {
-                Loop parse, A_LoopReadLine, ":"
-                {
-                    rowLength := A_LoopField
-                }
-            }
-    
-            if InStr(A_LoopReadLine, "stepTime")
-            {
-                Loop parse, A_LoopReadLine, ":"
-                {
-                    stepTime := A_LoopField
-                }
-            }
-    
-            if InStr(A_LoopReadLine, "depositContainer")
-            {
-                Loop parse, A_LoopReadLine, ":"
-                {
-                    depositContainer := A_LoopField
-                }
-            }
-    
-            if InStr(A_LoopReadLine, "windowName")
-            {
-                Loop parse, A_LoopReadLine, ":"
-                {
-                    windowName := A_LoopField
-                }
-    
-            }
-        }
-    
-        OutputDebug "autoFarmData.txt loaded`n"
-    
-        ;sets the window size and opens the minecraft debug menu
-        WinMove 0, 0, 854, 560, windowName
-        sleep 50
-        send "{F3}"
-        sleep 50
-    
-        xyzCoords := findXYZ() ;coordinates of XYZ: the top left of the second paragraph of the minecraft debug menu
-        initialCoords := centerCoordinates(getCoords(xyzCoords)) ;coordinates where the player starts
-    
-        facingData := Direction(,,,,) ;data regarding which way the player is facing
-        nseORw := getDirection(xyzCoords)
-        if(nseORw = "n")
-        {
-            facingData := Direction(nseORw, "d", "a", "s", "w")
-        }
-            
-        if(nseORw = "s")
-        {
-            facingData := Direction(nseORw, "a", "d", "w", "s")
-        }
-            
-        if(nseORw = "e")
-        {
-            facingData := Direction(nseORw, "w", "s", "d", "a")
-        }
-            
-        if(nseORw = "w")
-        {
-            facingData := Direction(nseORw, "s", "w", "a", "d")
-        }
-    
-        currentRowCoords := initialCoords ;coordinates of the row currently being harvested
-        topLeftInv := Coordinates() ;coorinates of the upper left inventory slot while depositing
-        boxSize := 35 ;the size of the inventory slots
-    
-        ;sets proper coordinates for target deposit container
-        if(depositContainer = "single")
-        {
-            topLeftInv := Coordinates(276, 270, 0)
-        }
-    
-        if(depositContainer = "barrel")
-        {
-            topLeftInv := Coordinates(276, 270, 0)
-        }
-    
-        if(depositContainer = "double")
-        {
-            topLeftInv := Coordinates(276, 323, 0)
-        }
-    
-        if(depositContainer = "hopper")
-        {
-            topLeftInv := Coordinates(276, 237, 0)
         }
         
-        OutputDebug "variables set`n"
+        if InStr(A_LoopReadLine, "sections")
+        {
+            Loop parse, A_LoopReadLine, ":"
+            {
+                sections := A_LoopField
+            }
+        }
     
-        ;center player on the block they are standing on
-        centerPlayer(initialCoords, stepTime, facingData, xyzCoords)
+        if InStr(A_LoopReadLine, "rowsPerSection")
+        {
+            Loop parse, A_LoopReadLine, ":"
+            {
+                rowsPerSection := A_LoopField
+            }
+        }
     
+        if InStr(A_LoopReadLine, "rowLength")
+        {
+            Loop parse, A_LoopReadLine, ":"
+            {
+                rowLength := A_LoopField
+            }
+        }
+    
+        if InStr(A_LoopReadLine, "sneakTime")
+        {
+            Loop parse, A_LoopReadLine, ":"
+            {
+                sneakTime := A_LoopField
+            }
+        }
+
+        if InStr(A_LoopReadLine, "walkTime")
+        {
+            Loop parse, A_LoopReadLine, ":"
+            {
+                walkTime := A_LoopField
+            }
+        }
+    
+        if InStr(A_LoopReadLine, "depositContainer")
+        {
+            Loop parse, A_LoopReadLine, ":"
+            {
+                depositContainer := A_LoopField
+            }
+        }
+    
+        if InStr(A_LoopReadLine, "windowName")
+        {
+            Loop parse, A_LoopReadLine, ":"
+            {
+                windowName := A_LoopField
+            }
+    
+        }
+    }
+    
+    OutputDebug "autoFarmData.txt loaded`n"
+    
+    ;sets the window size and opens the minecraft debug menu
+    WinMove 0, 0, 854, 560, windowName
+    sleep 50
+    send "{F3}"
+    sleep 50
+    
+    xyzCoords := findXYZ() ;coordinates of XYZ: the top left of the second paragraph of the minecraft debug menu
+    initialCoords := centerCoordinates(getCoords(xyzCoords)) ;coordinates where the player starts
+    
+    facingData := Direction(,,,,) ;data regarding which way the player is facing
+    nseORw := getDirection(xyzCoords)
+    if(nseORw = "n")
+    {
+        facingData := Direction(nseORw, "d", "a", "s", "w")
+    }
+            
+    if(nseORw = "s")
+    {
+        facingData := Direction(nseORw, "a", "d", "w", "s")
+    }
+            
+    if(nseORw = "e")
+    {
+        facingData := Direction(nseORw, "w", "s", "d", "a")
+    }
+            
+    if(nseORw = "w")
+    {
+        facingData := Direction(nseORw, "s", "w", "a", "d")
+    }
+    
+    topLeftInv := Coordinates() ;coorinates of the upper left inventory slot while depositing
+    boxSize := 35 ;the size of the inventory slots
+    
+    ;sets proper coordinates for target deposit container
+    if(depositContainer = "single")
+    {
+        topLeftInv := Coordinates(276, 270, 0)
+    }
+    
+    if(depositContainer = "barrel")
+    {
+        topLeftInv := Coordinates(276, 270, 0)
+    }
+    
+    if(depositContainer = "double")
+    {
+        topLeftInv := Coordinates(276, 323, 0)
+    }
+    
+    if(depositContainer = "hopper")
+    {
+        topLeftInv := Coordinates(276, 237, 0)
+    }
+        
+    OutputDebug "variables set`n"
+    
+     /*completes the harvest, storage, and replanting process for all layers*/
+    loop layers
+    {
+        ;center player on the initial coordinates
+        centerPlayer(initialCoords, sneakTime, walkTime, facingData, xyzCoords)
         OutputDebug "Player centered on initial coordinates:" initialCoords.ToString() "`n"
     
+        currentRowCoords := initialCoords ;coordinates of the row currently being harvested
+        nextRowCoords := getNextRow(currentRowCoords, facingData)
+
         sectionsCount := 0
         rowCount := 0
-        /* implements functions to complete the harvest, storage, and replanting process*/
+       
+        ;harvests and deposits an enire layer
         loop sections {
             sectionsCount += 1
             rowCount := 0
             OutputDebug "starting section " sectionsCount "`n"
-            loop rowsPerSection {
+            
+            ;harvests and deposits a single section
+            loop rowsPerSection
+            {
                 rowCount += 1
     
                 OutputDebug "harvesting row " rowCount "`n"
-    
                 ;harvests one row
-                loop rowLength {
-                    step(stepTime, "w", 1)
+                loop rowLength
+                {
+                    sneak(sneakTime, "w", 1)
                     click "Left"
                     sleep 200
                     click "Right"
@@ -836,12 +880,21 @@ getNextRow(currentRow, facingData)
                 }
                 
                 OutputDebug "row " rowCount " harvested`n"
-    
-                ;takes player back to the beginning of the row
-                centerPlayer(currentRowCoords, stepTime, facingData, xyzCoords)
+
+                ;if on the last row of the section, deposit in the chest on the current row
+                if(rowCount = rowsPerSection)
+                {
+                    centerPlayer(currentRowCoords, sneakTime, walkTime, facingData, xyzCoords)
+                }
+
+                ;send to next row to deposit, don't need to get coordinates as often this way
+                else
+                {
+                    centerPlayer(nextRowCoords, sneakTime, walkTime, facingData, xyzCoords)
+                }
             
-                OutputDebug "depositing items`n"
                 ;deposits items into the chest
+                OutputDebug "depositing items`n"
                 click "Right"
                 sleep 1000
                 cursorCoords := Coordinates(topLeftInv.x, topLeftInv.y, topLeftInv.z)
@@ -861,13 +914,24 @@ getNextRow(currentRow, facingData)
                 }
                 Send "{Escape}"
                 OutputDebug "items deposited`n"
-                ;takes player to beginning of next row
+            
+                ;moves the current row over one block to the right
                 currentRowCoords := getNextRow(currentRowCoords, facingData)
-                centerPlayer(currentRowCoords, stepTime, facingData, xyzCoords)
-            } 
+                nextRowCoords := getNextRow(currentRowCoords, facingData)
+            }
+            ;moves the current row over one block to the right, moves player to next section
             currentRowCoords := getNextRow(currentRowCoords, facingData)
-            centerPlayer(currentRowCoords, stepTime, facingData, xyzCoords)
+            nextRowCoords := getNextRow(currentRowCoords, facingData)
+            centerPlayer(currentRowCoords, sneakTime, walkTime, facingData, xyzCoords)
         }
-        MsgBox "Harvest Complete OwO"
-        ExitApp
+        ;sets the current row to the stairwell and moves there
+        currentRowCoords := getNextRow(currentRowCoords, facingData)
+        nextRowCoords := getNextRow(currentRowCoords, facingData)
+        centerPlayer(currentRowCoords, sneakTime, walkTime, facingData, xyzCoords)
+        walk(walkTime, "w", 6)
+        walk(walkTime, "d", 2)
+        walk(walkTime, "s", 6)
     }
+    MsgBox "Harvest Complete OwO"
+    ExitApp
+}
