@@ -77,8 +77,8 @@ depositContainer: the type of container you will be depositing items in. valid t
 
 windowName: The name of the Minecraft window. This can usually be found in the title bar of the window (ie. Minecraft 1.21.1 - Singleplayer)
 
-*Due to the granularity of the OS's time-keeping system, the script will typically round these values up to the nearest
-multiple of 10 or 15.6 milliseconds. Sever lag can also effect this. Essentially, no matter how you adjust this
-variable, some crops will probably be missed, especially if you have very long rows. If the script had to check the
-coordinates at every single block, all the blocks could be harvested, but it would take a very, very long time. I
-sacrificed a little accuracy for a whole lot of speed.
+*Due to the granularity of the OS's time-keeping system, the script will typically round these values up to the
+nearest multiple of 10 or 15.6 milliseconds. Sever lag can also effect this. Essentially, no matter how you
+adjust this variable, some crops will probably be missed, especially if you have very long rows. If the script
+had to check the coordinates at every single block, all the blocks could be harvested, but it would take a very,
+very long time. I sacrificed a little accuracy for a whole lot of speed.
