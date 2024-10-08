@@ -17,7 +17,7 @@ S:a decending stair block, leading to the next layer
 -: an empty space
 
 
-All the blocks in this diagram are at the same Z coordinate, with the exception of stairs. 
+All the blocks in this diagram are at the same Y coordinate, with the exception of stairs. 
 This diagram is viewed from the top, down and represents a single layer
 
 -oooooooooo
