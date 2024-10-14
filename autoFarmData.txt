@@ -1,8 +1,0 @@
-layers:1
-sectionsPerLayer:7
-rowsPerSection:8
-rowLength:72
-sneakTime:771
-walkTime:231
-depositContainer:double
-windowName:Minecraft 1.21.1 - Multiplayer (3rd-party Server)
