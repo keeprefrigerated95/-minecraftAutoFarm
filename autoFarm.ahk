@@ -771,6 +771,7 @@ setUpWindow()
         sleep 50
     }
 
+    sleep 1000
     if(readScreen(debugMenu) != "M")
     {
         MsgBox "Unable to read the Minecraft Debug Screen!", "ERROR", "Iconx"
