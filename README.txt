@@ -13,11 +13,11 @@ x: tilled soil with crops planted
 o: water blocks
 H: Hopper/chest/barrel
 P: character starting position
-S:a decending stair block, leading to the next layer
--: an empty space
+S: a descending stair block, leading to the next layer
+-: and empty space
 
 
-All the blocks in this diagram are at the same Y coordinate, with the exception of stairs. 
+All the blocks in this diagram are at the same Z coordinate, with the exception of stairs. 
 This diagram is viewed from the top, down and represents a single layer
 
 -oooooooooo
@@ -54,9 +54,9 @@ At any time if you need to kill the script, press the x key. If the x key doesn'
 pressing shift and then x.
 
 *************************
-PARAMETERS
+SETTINGS
 *************************
-The script reads parameters from the text file autoFarmData.txt, giving you the ability to customize
+The script reads settings from the text file autoFarmSettings.txt, giving you the ability to customize
 the script to your farm layout. These are the following parameters:
 
 layers: The number of layers of farm fields stacked on top of each other, all layers must be identical
@@ -64,8 +64,7 @@ layers: The number of layers of farm fields stacked on top of each other, all la
 sectionsPerLayer: A section consists of the rows in-between two rows of water. In the diagram above there
 are two sections.
 
-rowsPerSection: The number of rows in a single section. Every section must have the same number of rows. In the
-diagram above this value would be 4.
+rowsPerSection: The number of rows in a single section. Every section must have the same number of rows. In the diagram above this value would be 4.
 
 rowLength: The length of each row. In the diagram above, this would be 10. All the rows must have the same length.
 
@@ -75,10 +74,9 @@ walkTime: The time in milliseconds that it takes for your character to move one 
 
 depositContainer: the type of container you will be depositing items in. valid types are single, double, hopper, or barrel
 
-windowName: The name of the Minecraft window. This can usually be found in the title bar of the window (ie. Minecraft 1.21.1 - Singleplayer)
+windowName: The name of the Minecraft window. This can usually be found in the title bar of the window (ie. Minecraft 1.21.1 - Singleplayer). If this variable is omitted from the settings file, the program will search for an open window with "Minecraft" at the beginning of the title.
 
-*No matter how you adjust these variables, some crops will probably be missed, especially if you have very long
-rows. If the script had to check the coordinates at every single block, all the blocks could be harvested, but
-it would take a very, very long time. I sacrificed a little accuracy for a whole lot of speed. The main problem
-is due to the granularity of the OS's time-keeping system, the script will typically round these values up to the
-nearest multiple of 10 or 15.6 milliseconds. Sever lag can also effect walking distance. 
+*Due to the granularity of the OS's time-keeping system, the script will typically round tese values up to the nearest multiple
+of 10 or 15.6 milliseconds. Sever lag can also effect this. Essentially, no matter how you adjust this variable, some crops will
+probably be missed, especially if you have very long rows. If the script had to check the coordinates at every single block, all
+the blocks could be harvested, but it would take a very, very long time. I sacrificed a little accuracy for a whole lot of speed
