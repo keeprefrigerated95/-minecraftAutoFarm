@@ -5,8 +5,18 @@
 
 #Include coordinates.ahk
 #Include direction.ahk
+#Include settings.ahk
 
 CoordMode "Pixel", "Client"
+
+FARMSETTINGS := Settings()
+try
+    FARMSETTINGS.loadFromFile("autoFarmSettings.txt")
+catch
+{
+    MsgBox "autoFarmSettings.txt not found!", "Error", "Iconx"
+    ExitApp
+}
 
 /* ***********************************************
  * sneak
@@ -47,7 +57,7 @@ sneak(timer, key, numSteps)
  * WALK
  * walks the player
  * timer: how long each step takes
- * key: the key that will be presses, w, a, s, or d
+ * key: the key that will be pressed, w, a, s, or d
  * numSteps: the number of steps that will be taken
  *******************************************************/
 walk(timer, key, numSteps)
@@ -58,170 +68,41 @@ walk(timer, key, numSteps)
     sleep 100
 }
 
-/****************************************************
-* GETPIXELS
-* A function that gets the number of white pixels
-* within a certain range
-* X & Y: coordinates of the top left coner of the target
-*        area 
-* LENGHT: Length of the target area
-* WIDTH: Width of the target area
-*****************************************************/
-getPixels(firstPixel, width, height)
-{
-    ;OutputDebug "`n----------------`nGETPIXELS`nINPUT`n"
-    ;OutputDebug "firstPixel: " firstPixel.ToString() "`n"
-    ;OutputDebug "width: " width "`n"
-    ;OutputDebug "height: " height "`n"
-
-    pixelToRead := Coordinates(firstPixel.x, firstPixel.y, 0)
-    whitePixels := 0
-
-    ;gets the columns of pixels
-    loop height
-    {
-        ;gets the rows of pixels
-        loop width
-        {
-            pixelColor := PixelGetColor(pixelToRead.x, pixelToRead.y)
-            if (pixelColor = "0xdddddd")
-            {
-                whitePixels := whitePixels + 1
-            }
-
-            pixelToRead.x += 2
-        }
-        pixelToRead.y += 2
-        pixelToRead.x := firstPixel.x
-    }
-
-    ;OutputDebug "OUTPUT`n"
-    ;OutputDebug "whitePixels: " whitePixels "`n----------------`n"
-    return whitePixels
-}
-
-/************************************************
-* CHECKIFDECIMAL
-* Checks to see if a block of text at the coordinates
-* is a decimal
-* returns 0 if no, 1 if yes
-************************************************/
-checkIfDecimal(currentSlot)
-{
-    ;OutputDebug "`n----------------`nCHECK IF DECIMAL START`n"
-    ;OutputDebug "INPUT`n"
-    ;OutputDebug "currentSlot: " currentSlot.ToString() "`n----------------`n"
-
-    isDecimal := 0
-    sectionOne := Coordinates(currentSlot.x - 2, currentSlot.y, 0)
-    sectionTwo := Coordinates(currentSlot.x - 2, currentSlot.y + 12, 0)
-    sectionThree := Coordinates(currentSlot.x, currentSlot.y + 12, 0)
-
-    ;if the top section above the pixel is blank, and if there is one pixel on the bottom center
-    if (getPixels(sectionOne, 3, 6) = 0 and getPixels(sectionTwo, 3, 1) = 1 and PixelGetColor(sectionThree.x, sectionThree.y) = "0xdddddd")
-    {
-        isDecimal := 1
-    }
-    
-    ;OutputDebug "`n----------------`nCHECK IF DECIMAL END`n"
-    ;OutputDebug "OUTPUT`n"
-    ;OutputDebug "isDecimal: " isDecimal "`n----------------`n"
-    return isDecimal
-}
-
-/**************************************************
-* PIXELSTONUM
-* converts raw data from the minecract debug screen
-*  into a number
-* WHITE PIXELS: The number of pixels with a portion of 
-* text in a given area
-* xStart and yStart: the coordinates of the number which 
-* is being read, the center of the top left pixel in 
-* the field where it is located (in groups of four pixels)
-***************************************************/
-pixelToNum(whitePixels, topLeftCoords)
-{
-    ;OutputDebug "`n----------------`nPIXELNOTNUM`nINPUT`n"
-    ;OutputDebug "whitePixels: " whitePixels "`n"
-    ;OutputDebug "topLeftCoords: " topLeftCoords.ToString() "`n"
-
-    numToPush := -1
-
-    ;unique number of pixels
-    if (whitePixels = 19)
-    {
-        numToPush := 0.0
-    }
-        
-    else if (whitePixels = 16)
-    {
-        numToPush := 2.0
-    }
-
-    else if (whitePixels = 14)
-    {
-        numToPush := 3.0
-    }
-
-    ;12 white pixels
-    if (whitePixels = 12 and PixelGetColor(topLeftCoords.x, topLeftCoords.y) = "0xdddddd")
-    {
-        numToPush := 7.0
-    }
-
-    else if (whitePixels = 12)
-    {
-        numToPush := 1.0
-    }
-
-
-
-    ;15 white pixels
-    if (whitePixels = 15 and PixelGetColor(topLeftCoords.x + 2, topLeftCoords.y) = "0xdddddd")
-    {
-        numToPush := 9.0
-    }
-
-    else if (whitePixels = 15 and PixelGetColor(topLeftCoords.x + 8, topLeftCoords.y) = "0xdddddd")
-    {
-        numToPush := 4.0
-    }
-
-    else if (whitePixels = 15)
-    {
-        numToPush := 6.0
-    }
-
-    ;17 white pixels
-    if (whitePixels = 17 and PixelGetColor(topLeftCoords.x, topLeftCoords.y) = "0xdddddd")
-    {
-        numToPush := 5.0
-    }
-
-    else if (whitePixels = 17)
-    {
-        numToPush := 8.0
-    }
-
-    ;OutputDebug "OUTPUT`n"
-    ;OutputDebug "numToPush: " numToPush "`n----------------`n"
-    return numToPush
-}
-
 /*******************************************************
  * READ SCREEN
- * reads the debug menu at the input coordinates and returns
- * the proper value
+ * returns a single characher from the minecraft debug screen
+ * coordsToRead: the coordinates of the charachter to be read
  ******************************************************/
 readScreen(coordsToRead)
 {
-    ;an array of the pixels in the letter X
-    upperXpixels := [1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1]
+    OutputDebug "READSCREEN`ncoordsToRead: " coordsToRead.ToString() "`n"
+
+    ;arrays of the pixels in various letters and numbers
+    ;0 is no pixel, 1 is a lit pixel, 2 can be either lit or until  
+    zeroPixels := [0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0]
+    onePixels := [0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1]
+    twoPixels := [0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1]
+    threePixels := [0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0]
+    fourPixels := [0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    fivePixels := [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0]
+    sixPixels := [0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0]
+    sevenPixels := [1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0]
+    eightPixels := [0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0]
+    ninePixels := [0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0]
+    upperBpixels := [1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0]
+    upperMPixels := [1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1]
+    upperXpixels := [1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1]
+    lowerEPixels := [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1]
+    lowerNPixels := [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1]
+    lowerSPixels := [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0]
+    lowerWPixels := [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1]
+    periodPixels := [0, 0, 2, 2, 2, 0, 0, 2, 2, 2, 0, 0, 2, 2, 2, 0, 0, 2, 2, 2, 0, 0, 2, 2, 2, 0, 0, 2, 2, 2, 1, 0, 2, 2, 2]
+    minusSignPixels := [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
     ;an array of the pixels read from the screen
     pixelsRead := []
 
     pixelToRead := Coordinates(coordsToRead.x, coordsToRead.y, 0)
-    whitePixels := 0
 
     ;gets the columns of pixels
     loop 7
@@ -230,7 +111,7 @@ readScreen(coordsToRead)
         loop 5
         {
             pixelColor := PixelGetColor(pixelToRead.x, pixelToRead.y)
-            if (pixelColor = "0xdddddd")
+            if (pixelColor = "0xdddddd" or pixelColor = "0xfcfcfc")
             {
                 pixelsRead.Push(1)
             }
@@ -246,28 +127,148 @@ readScreen(coordsToRead)
         pixelToRead.x := coordsToRead.x
     }
 
-    isUpperX := 0
+    ;compares the array of pixels read with each of the arrays to determine the output
+    isZero := 1
+    isOne := 1
+    isTwo := 1
+    isThree := 1
+    isFour := 1
+    isFive := 1
+    isSix := 1
+    isSeven := 1
+    isEight := 1
+    isNine := 1
+    isUpperB := 1
+    isUpperM := 1
+    isUpperX := 1
+    isLowerE := 1
+    isLowerN := 1
+    isLowerS := 1
+    isLowerW := 1
     arrayIndex := 1
+    isPeriod := 1
+    isMinusSign := 1
     loop pixelsRead.Length
     {
-        if(upperXpixels[arrayIndex] != pixelsRead[arrayIndex])
-        {
-            isUpperX := 0
-            break
-        }
+        if(zeroPixels[arrayIndex] != pixelsRead[arrayIndex])
+            isZero := 0
 
-        else
-        {
-            isUpperX := 1
-        }
+        if(onePixels[arrayIndex] != pixelsRead[arrayIndex])
+            isOne := 0
+
+        if(twoPixels[arrayIndex] != pixelsRead[arrayIndex])
+            isTwo := 0
+
+        if(threePixels[arrayIndex] != pixelsRead[arrayIndex])
+            isThree := 0
+
+        if(fourPixels[arrayIndex] != pixelsRead[arrayIndex])
+            isFour := 0
+
+        if(fivePixels[arrayIndex] != pixelsRead[arrayIndex])
+            isFive := 0
+
+        if(sixPixels[arrayIndex] != pixelsRead[arrayIndex])
+            isSix := 0
+
+        if(sevenPixels[arrayIndex] != pixelsRead[arrayIndex])
+            isSeven := 0
+
+        if(eightPixels[arrayIndex] != pixelsRead[arrayIndex])
+            isEight := 0
+
+        if(ninePixels[arrayIndex] != pixelsRead[arrayIndex])
+            isNine := 0
+
+        if(upperMPixels[arrayIndex] != pixelsRead[arrayIndex])
+            isUpperM := 0
+
+        if(upperBpixels[arrayIndex] != pixelsRead[arrayIndex])
+            isUpperB := 0
+
+        if(upperXpixels[arrayIndex] != pixelsRead[arrayIndex])
+            isUpperX := 0
+
+        if(lowerEPixels[arrayIndex] != pixelsRead[arrayIndex])
+            isLowerE := 0
+
+        if(lowerNPixels[arrayIndex] != pixelsRead[arrayIndex])
+            isLowerN := 0
+
+        if(lowerSPixels[arrayIndex] != pixelsRead[arrayIndex])
+            isLowerS := 0
+
+        if(lowerWPixels[arrayIndex] != pixelsRead[arrayIndex])
+            isLowerW := 0
+
+        if(periodPixels[arrayIndex] != pixelsRead[arrayIndex] and periodPixels[arrayIndex] != 2)
+            isPeriod := 0
+
+        if(minusSignPixels[arrayIndex] != pixelsRead[arrayIndex])
+            isMinusSign := 0
+
+        arrayIndex += 1
     }
 
     output := "no text found"
-    if(isUpperX)
-    {
-        output := "X"
-    }
+    if(isZero)
+        output := 0
 
+    if(isOne)
+        output := 1
+
+    if(isTwo)
+        output := 2
+
+    if(isThree)
+        output := 3
+
+    if(isFour)
+        output := 4
+
+    if(isFive)
+        output := 5
+
+    if(isSix)
+        output := 6
+
+    if(isSeven)
+        output := 7
+
+    if(isEight)
+        output := 8
+
+    if(isNine)
+        output := 9
+
+    if(isUpperX)
+        output := "X"
+
+    if(isUpperB)
+        output := "B"
+
+    if(isUpperM)
+        output := "M"
+
+    if(isLowerE)
+        output := "e"
+
+    if(isLowerN)
+        output := "n"
+
+    if(isLowerS)
+        output := "s"
+
+    if(isLowerW)
+        output := "w"
+
+    if(isPeriod)
+        output := "."
+
+    if(isMinusSign)
+        output := "-"
+
+    OutputDebug "output: " output "`n`n"
     return output
 }
 /*******************************************************
@@ -300,6 +301,7 @@ findXYZ()
 * GET COORDS 
 * A function that gets the coordinates from the minecraft
 * debug screen and saves them to global variables
+* XYZcoords: the coordinates of "XYZ:" on the minecraft debug screen
 *****************************************************/
 getCoords(XYZcoords)
 { 
@@ -313,27 +315,30 @@ getCoords(XYZcoords)
     yValues := Array()
     zValues := Array()
 
-    ;OutputDebug "`n----------------`nGET COORDS START`n"
-    ;OutputDebug "topLeftCoords: " topLeftCoords.ToString() "`n----------------`n"
+    OutputDebug "`n----------------`nGET COORDS START`n"
+    OutputDebug "topLeftCoords: " topLeftCoords.ToString() "`n----------------`n"
 
     /*quit loop 0 assigns the x value
       1 assigns y, 2 assigns z, 3 quits the loop */
     quitLoop := 0
     while (quitLoop < 3)
     {
-        ;check to see if there is a decimal and adjst x coordinate
-        isDecimal := checkIfDecimal(topLeftCoords)
-        if (isDecimal = 1)
+
+        ;the number that is to be added to the coordinates
+        numToPush := readScreen(topLeftCoords)
+
+        ;check to see if there is a decimal and adjst x coordinate to read the
+        ;number, not the decimal
+        goToNextCoord := 0 ;tells the loop to read the next coordinate, y or z, or leave the loop
+        if (numToPush = ".")
         {
             topLeftCoords.x += 4
-            ;OutputDebug "Is Decimal`n"
+            numToPush := readScreen(topLeftCoords)
+            goToNextCoord := 1
         }
 
-        ;gets the number of pixels in this quadrant
-        whitePixels := getPixels(topLeftCoords, textWidth, textHeight)
-
         ;check if the coordinate is a negative symbol
-        if (whitePixels = 5)
+        if (numToPush = "-")
         {
             if(quitLoop = 0)
             {
@@ -354,13 +359,13 @@ getCoords(XYZcoords)
         ;if not a negative symbol, figures out which number is being read, if any
         else
         {
-            numToPush := pixelToNum(whitePixels, topLeftCoords)
             ;pushes the number that was read to the appropriate array
-            if (numToPush != -1)
+            if (numToPush != "no text found")
             {
                 if(quitLoop = 0)
                 {
                     xValues.Push(numToPush)
+                     OutputDebug "numToPuch: " numToPush "`n"
                 }
 
                 if(quitLoop = 1)
@@ -373,38 +378,40 @@ getCoords(XYZcoords)
                     zValues.Push(numToPush)
                 }
             }
+
+            else
+            {
+                OutputDebug "no text found`n"
+            }
         }
         ;moves to the next number in the row
-        if(isDecimal = 0)
+        if(goToNextCoord = 0)
         {
-            ;xStart := xStart + 12
             topLeftCoords.x += 12
         }
 
         ;ends the loop
-        if(isDecimal = 1 and quitLoop = 2)
+        if(goToNextCoord = 1 and quitLoop = 2)
         {
             quitLoop := quitLoop + 1
         }
 
         ;moves to the Z coordinate
-        if(isDecimal = 1 and quitLoop = 1)
+        if(goToNextCoord = 1 and quitLoop = 1)
         {
             quitLoop := quitLoop + 1
-            ;xStart := xStart + 88
             topLeftCoords.x += 88
         }
 
         ;moves to the Y coordinate
-        if(isDecimal = 1 and quitLoop = 0)
+        if(goToNextCoord = 1 and quitLoop = 0)
         {
             quitLoop := quitLoop + 1
-            ;xStart := xStart + 64
             topLeftCoords.x += 64
         }
     }
     
-    ;converts the arrays to floats and saves to global variable
+    ;converts the arrays to floats and returns the coordinates
     xIn := 0.0
     yIn := 0.0
     zIn := 0.0
@@ -414,7 +421,7 @@ getCoords(XYZcoords)
     loop xArrayLength
     {
         xIn := xIn + (xValues.Pop() * multiplier)
-        multiplier := multiplier * 10.0 
+        multiplier := multiplier * 10.0
     }
     xIn := xIn * xIsNegative
 
@@ -438,9 +445,8 @@ getCoords(XYZcoords)
 
     output := Coordinates(xIn, yIn, zIn)
 
-    ;OutputDebug "`n----------------`nGETCOORDS END`n"
-    ;OutputDebug "OUTPUT`n"
-    ;OutputDebug "output coordinates: " output.ToString() "`n----------------`n"
+    OutputDebug "`n----------------`nGETCOORDS END`n"
+    OutputDebug "output coordinates: " output.ToString() "`n----------------`n"
     return output
 }
 
@@ -448,6 +454,7 @@ getCoords(XYZcoords)
 * GETDIRECTION
 * gets the direction in which the player is facing
 * returns a string n, s, e or w
+* xyzCoords: the coordinates of "XYZ:" on the minecraft debug screen
 *************************************************/
 getDirection(xyzCoords)
 {
@@ -458,28 +465,7 @@ getDirection(xyzCoords)
 
     ;OutputDebug "`n----------------`nGETDIRECTION`nxyzCoords: " xyzCoords.ToString() "`n"
 
-    ;gets the number of pixels in this quadrant
-    whitePixels := getPixels(topLeftCoords, textWidth, textHeight)
-
-    if (whitePixels = 12)
-    {
-        direction := "n"
-    }
-
-    else if (whitePixels = 15)
-    {
-        direction := "e"
-    }
-
-    else if (whitePixels = 13)
-    {
-        direction := "s"
-    }
-
-    else if (whitePixels = 14)
-    {
-        direction := "w"
-    }
+    direction := readScreen(topLeftCoords)
     
     ;OutputDebug "OUTPUT`n"
     ;OutputDebug "direction: " direction "`n----------------`n"
@@ -491,6 +477,7 @@ getDirection(xyzCoords)
  * CENTER COORDINATES
  * gives the exact center coordinates of the block that
  * is given, rounds to 0.5
+ * inputCoords: the coordinates that need to be rounded to 0.5
  ****************************************************/
 centerCoordinates(inputCoords)
 {
@@ -541,7 +528,7 @@ centerCoordinates(inputCoords)
 
     outputCoords := Coordinates(centeredX, centeredY, centeredZ)
 
-    ;OutputDebug "outputCoords: " outputCoords.ToString() "`n-------------------`n"
+    ;OutputDebug "outputCoords: " outputCoords.ToString() "`ninputCoords" inputCoords.ToString() "`n-------------------`n"
 
     return outputCoords
 }
@@ -549,7 +536,11 @@ centerCoordinates(inputCoords)
 /**************************************************
 * CENTER PLAYER 
 * centers the player on the target coordinates
-* targetX & targetZ: the target coordinates
+* targetCoords: the target coordinates
+* sneakTimer: time in miliseconds it takes to walk one block while sneaking
+* walkTimer: time in milliseconds it takes to walk one block
+* facingData: info about which way the player is facing
+* xyzCoords: the coordinates of "XYZ: " on the minecraft debug screen
 **************************************************/
 centerPlayer(targetCoords, sneakTimer, walkTimer, facingData, xyzCoords)
 {
@@ -562,8 +553,8 @@ centerPlayer(targetCoords, sneakTimer, walkTimer, facingData, xyzCoords)
     zIsCentered := 0
     xIsCentered := 0
 
-    ;OutputDebug "`n----------------`nCENTER PLAYER`nINPUT`n"
-    ;OutputDebug "targetCoords: " targetCoords.ToString() "`ncurrentCoordinates: " currentCoords.ToString() "`n"
+    OutputDebug "`n----------------`nCENTER PLAYER`nINPUT`n"
+    OutputDebug "targetCoords: " targetCoords.ToString() "`ncurrentCoordinates: " currentCoords.ToString() "`n"
 
     ;take the player to the correct coordinates
     while(centered = 0)
@@ -600,7 +591,7 @@ centerPlayer(targetCoords, sneakTimer, walkTimer, facingData, xyzCoords)
         }
     }
     
-    ;OutputDebug "Arrived at block`n"
+    OutputDebug "Arrived at block`n"
     
     ;centers the player on the block itself
     centered := 0
@@ -639,299 +630,295 @@ centerPlayer(targetCoords, sneakTimer, walkTimer, facingData, xyzCoords)
             currentCoords := getCoords(xyzCoords)
         }
     }
-        OutputDebug "Centered on Block`n-----------------------`n"
+    OutputDebug "Centered on Block`n-----------------------`n"
 }
     
     
 /*********************************************************
 * GET NEXT ROW
-* returns the coordinates of the next row
-     **********************************************************/
+* returns the coordinates of the row directly to the right of the player
+* currentRow: the coordinates of the current row
+* facingData: info about which way the player is facing
+**********************************************************/
 getNextRow(currentRow, facingData)
 {
-    nextRowCoords := Coordinates()
-    ;currentRow := Coordinates(Integer(currentRow.x), Integer(currentRow.y), Integer(currentRow.z))
+    nextRow := Coordinates()
     
-    ;OutputDebug "`n---------------`nGETNEXTROW`nCurrent Row: " currentRow.ToString() "`nFacing: " facingData.cardinalDir "`n"
+    OutputDebug "`n---------------`nGETNEXTROW`nCurrent Row: " currentRow.ToString() "`nFacing: " facingData.cardinalDir "`n"
      
     if(facingData.cardinalDir = "n")
     {
-        nextRowCoords := Coordinates(currentRow.x + 1, currentRow.y, currentRow.z)
+        nextRow := Coordinates(currentRow.x + 1, currentRow.y, currentRow.z)
     }
     
     if(facingData.cardinalDir = "s")
     {
-        nextRowCoords := Coordinates(currentRow.x - 1, currentRow.y, currentRow.z)
+        nextRow := Coordinates(currentRow.x - 1, currentRow.y, currentRow.z)
     }
     
     if(facingData.cardinalDir = "e")
     {
-        nextRowCoords := Coordinates(currentRow.x, currentRow.y, currentRow.z + 1)
+        nextRow := Coordinates(currentRow.x, currentRow.y, currentRow.z + 1)
     }
     
     if(facingData.cardinalDir = "w")
     {
-        nextRowCoords := Coordinates(currentRow.x, currentRow.y, currentRow.z - 1)
+        nextRow := Coordinates(currentRow.x, currentRow.y, currentRow.z - 1)
     }
     
-    ;OutputDebug "nextRowCoords: " nextRowCoords.ToString() "`n------------------`n"
-    return centerCoordinates(nextRowCoords)
+    OutputDebug "nextRowCoords: " nextRow.ToString() "`n------------------`n"
+    return centerCoordinates(nextRow)
 }
-    
-MsgBox "Welcome to Auto Farm! Press R to begin the harvest process. Press X to cancel at any time :3 You may close this window "
+ 
+/**********************************************************
+ * Resizes the minecraft window, exits the menu if opened
+ * and makes sure the debug screen is opened
+ **********************************************************/
+setUpWindow()
+{
+    ;searches for the Minecraft window and resizes it
+    exitLoop := 0
+    while(exitLoop = 0)
+    {
+        ;if the window saved in settings exist set it up normally
+        if WinExist(FARMSETTINGS.windowName)
+        {
+            WinActivate
+            WinMove 0, 0, 854, 560, FARMSETTINGS.windowName
+            sleep 50
+            exitLoop := 1
+        }
+
+        ;work with the user to find the minecraft window
+        else
+        {
+            errorDecision := MsgBox(FARMSETTINGS.windowName " is not running or cannot be found. Run Minecraft and Try Again, or press Continue to do a manual search", "Error", "Iconx C/T/C")
+
+            ;exits the script
+            if (errorDecision = "Cancel")
+            {
+                MsgBox "Auto Farm Script Ended"
+                ExitApp
+            }
+
+            ;tries to find the minecraft window againt
+            else if (errorDecision = "Try Again")
+            {
+                if WinExist(FARMSETTINGS.windowName)
+                {
+                    WinActivate
+                    WinMove 0, 0, 854, 560, FARMSETTINGS.windowName
+                    sleep 50
+                    exitLoop := 1
+                }
+            }
+
+            ;promps the use with every open window to find which is minecraft
+            else if (errorDecision = "Continue")
+            {
+                if (WinExist(FARMSETTINGS.windowName))
+                {
+                    WinActivate
+                    WinMove 0, 0, 854, 560, FARMSETTINGS.windowName
+                    sleep 50
+                    exitLoop := 1
+                }
+
+                else
+                {
+                    openWindows := WinGetList()
+                    count := 1
+                    loop openWindows.Length
+                    {
+                        if (WinExist("ahk_id" openWindows[count]))
+                        {
+                            OutputDebug WinGetTitle("ahk_id" openWindows[count]) "`n"
+                            isMinecraft := MsgBox("Is this Minecraft? - " WinGetTitle("ahk_id" openWindows[count]), "Manual Search", "YesNo Icon?")
+
+                            if(isMinecraft = "Yes")
+                            {
+                                if WinExist(WinGetTitle("ahk_id" openWindows[count]))
+                                {
+                                    WinActivate
+                                    WinMove 0, 0, 854, 560, WinGetTitle("ahk_id" openWindows[count])
+                                    sleep 50
+                                    FARMSETTINGS.windowName := WinGetTitle("ahk_id" openWindows[count])
+                                    exitLoop := 1
+                                    break
+                                }
+                            }
+                        }
+                        count += 1
+                    }
+                }
+            }
+        }
+    }
+
+    ;checks to see if the menu needs to be closed or not
+    backToGame := Coordinates(355, 159, 0)
+    if(readScreen(backToGame) = "B")
+    {
+        click backToGame.x, backToGame.y
+        sleep 50
+    }
+
+    ;opens the debug screen
+    debugMenu := Coordinates(5, 5, 0)
+    if(readScreen(debugMenu) != "M")
+    {
+        send "{F3}"
+        sleep 50
+    }
+
+    if(readScreen(debugMenu) != "M")
+    {
+        MsgBox "Unable to read the Minecraft Debug Screen!", "ERROR", "Iconx"
+        ExitApp
+    }
+}
     
 /**********************************************
 * X HOTKEY
 * Press 'x' to cancel the script at any time
-* works if shift is being used by the script
 ***********************************************/
-x::
+*x::
 {
     Send "{Shift up}"
     MsgBox "Script Cancelled"
     ExitApp
 }
-    
-+x::
+
+*p::
 {
-    Send "{Shift up}"
-    MsgBox "Script Cancelled"
+    OutputDebug "PAUSED`n"
+    Pause -1
+    result := MsgBox("Would you like to continue? If you cancel, you will have to start the script over.", "Paused", "YesNo")
+    if (result = "Yes")
+    {
+        OutputDebug "UNPAUSED`n"
+        setUpWindow()
+        Pause -1
+    }
+
+    else
+    {
+        Send "{Shift up}"
+        MsgBox "Script Cancelled"
+        ExitApp
+    }
+}
+
+result := MsgBox("Welcome to Keep Refrigerated's Automatic Minecraft Farm Bot!`n`nInstructions:`nPosition your player on the starting block then press OK. Make sure you are facing towards the end of the first row.`n`nPress P to pause the script at any time`nPress X to cancel the script`n`nFor more information, refer to the README", "Welcome!", "OKCancel")
+
+if(result = "Cancel")
+{
     ExitApp
 }
-    
-    
-/**********************************************
-* R HOTKEY
-* Press 'R' to run the farming process
-***********************************************/
-r::
+
+setUpWindow()
+
+xyzCoords := findXYZ() ;coordinates of XYZ: the top left of the second paragraph of the minecraft debug menu
+initialCoords := centerCoordinates(getCoords(xyzCoords)) ;coordinates where the player starts
+;initialCoords := getCoords(xyzCoords)
+OutputDebug "INITIAL COORDS: " initialCoords.ToString() "`n"
+
+;sets up the facing data variable
+facingData := Direction(,,,,)
+nseORw := getDirection(xyzCoords)
+facingData.setDirection(nseORw)
+ 
+OutputDebug "variables set`n"
+
+/*completes the harvest, storage, and replanting process for all layers*/
+loop FARMSETTINGS.layers
 {
-    ;variables read from autoFarmData.txt
-    layers := 0
-    sectionsPerLayer := 0
-    rowsPerSection := 0
-    rowLength := 0
-    sneakTime := 0
-    walkTime := 0
-    depositContainer := ""
-    windowName := ""
-    
-    /* reads and loads data from the autoFarmData.txt file */
-    Loop read, "autoFarmData.txt"
-    {
-        if InStr(A_LoopReadLine, "layers")
-        {
-            Loop parse, A_LoopReadLine, ":"
-            {
-                layers := A_LoopField
-            }
-        }
-        
-        if InStr(A_LoopReadLine, "sections")
-        {
-            Loop parse, A_LoopReadLine, ":"
-            {
-                sections := A_LoopField
-            }
-        }
-    
-        if InStr(A_LoopReadLine, "rowsPerSection")
-        {
-            Loop parse, A_LoopReadLine, ":"
-            {
-                rowsPerSection := A_LoopField
-            }
-        }
-    
-        if InStr(A_LoopReadLine, "rowLength")
-        {
-            Loop parse, A_LoopReadLine, ":"
-            {
-                rowLength := A_LoopField
-            }
-        }
-    
-        if InStr(A_LoopReadLine, "sneakTime")
-        {
-            Loop parse, A_LoopReadLine, ":"
-            {
-                sneakTime := A_LoopField
-            }
-        }
+    ;center player on the initial coordinates
+    centerPlayer(initialCoords, FARMSETTINGS.sneakTime, FARMSETTINGS.walkTime, facingData, xyzCoords)
+    OutputDebug "Player centered on initial coordinates:" initialCoords.ToString() "`n"
 
-        if InStr(A_LoopReadLine, "walkTime")
-        {
-            Loop parse, A_LoopReadLine, ":"
-            {
-                walkTime := A_LoopField
-            }
-        }
-    
-        if InStr(A_LoopReadLine, "depositContainer")
-        {
-            Loop parse, A_LoopReadLine, ":"
-            {
-                depositContainer := A_LoopField
-            }
-        }
-    
-        if InStr(A_LoopReadLine, "windowName")
-        {
-            Loop parse, A_LoopReadLine, ":"
-            {
-                windowName := A_LoopField
-            }
-    
-        }
-    }
-    
-    OutputDebug "autoFarmData.txt loaded`n"
-    
-    ;sets the window size and opens the minecraft debug menu
-    WinMove 0, 0, 854, 560, windowName
-    sleep 50
-    send "{F3}"
-    sleep 50
-    
-    xyzCoords := findXYZ() ;coordinates of XYZ: the top left of the second paragraph of the minecraft debug menu
-    initialCoords := centerCoordinates(getCoords(xyzCoords)) ;coordinates where the player starts
-    
-    facingData := Direction(,,,,) ;data regarding which way the player is facing
-    nseORw := getDirection(xyzCoords)
-    if(nseORw = "n")
-    {
-        facingData := Direction(nseORw, "d", "a", "s", "w")
-    }
-            
-    if(nseORw = "s")
-    {
-        facingData := Direction(nseORw, "a", "d", "w", "s")
-    }
-            
-    if(nseORw = "e")
-    {
-        facingData := Direction(nseORw, "w", "s", "d", "a")
-    }
-            
-    if(nseORw = "w")
-    {
-        facingData := Direction(nseORw, "s", "w", "a", "d")
-    }
-    
-    topLeftInv := Coordinates() ;coorinates of the upper left inventory slot while depositing
-    boxSize := 35 ;the size of the inventory slots
-    
-    ;sets proper coordinates for target deposit container
-    if(depositContainer = "single")
-    {
-        topLeftInv := Coordinates(276, 270, 0)
-    }
-    
-    if(depositContainer = "barrel")
-    {
-        topLeftInv := Coordinates(276, 270, 0)
-    }
-    
-    if(depositContainer = "double")
-    {
-        topLeftInv := Coordinates(276, 323, 0)
-    }
-    
-    if(depositContainer = "hopper")
-    {
-        topLeftInv := Coordinates(276, 237, 0)
-    }
-        
-    OutputDebug "variables set`n"
-    
-     /*completes the harvest, storage, and replanting process for all layers*/
-    loop layers
-    {
-        ;center player on the initial coordinates
-        centerPlayer(initialCoords, sneakTime, walkTime, facingData, xyzCoords)
-        OutputDebug "Player centered on initial coordinates:" initialCoords.ToString() "`n"
-    
-        currentRowCoords := initialCoords ;coordinates of the row currently being harvested
-        nextRowCoords := getNextRow(currentRowCoords, facingData)
+    currentRowCoords := initialCoords ;coordinates of the row currently being harvested
+    nextRowCoords := getNextRow(currentRowCoords, facingData)
 
-        sectionsCount := 0
+    sectionsCount := 0
+    rowCount := 0
+    
+    ;harvests and deposits an enire layer
+    loop FARMSETTINGS.sectionsPerLayer {
+        sectionsCount += 1
         rowCount := 0
-       
-        ;harvests and deposits an enire layer
-        loop sections {
-            sectionsCount += 1
-            rowCount := 0
-            OutputDebug "starting section " sectionsCount "`n"
-            
-            ;harvests and deposits a single section
-            loop rowsPerSection
+        OutputDebug "starting section " sectionsCount "`n"
+        
+        ;harvests and deposits a single section
+        loop FARMSETTINGS.rowsPerSection
+        {
+            rowCount += 1
+
+            OutputDebug "harvesting row " rowCount "`n"
+            ;harvests one row
+            loop FARMSETTINGS.rowLength
             {
-                rowCount += 1
-    
-                OutputDebug "harvesting row " rowCount "`n"
-                ;harvests one row
-                loop rowLength
-                {
-                    sneak(sneakTime, "w", 1)
-                    click "Left"
-                    sleep 200
-                    click "Right"
-                    sleep 200
-                }
-                
-                OutputDebug "row " rowCount " harvested`n"
-
-                ;if on the last row of the section, deposit in the chest on the current row
-                if(rowCount = rowsPerSection)
-                {
-                    centerPlayer(currentRowCoords, sneakTime, walkTime, facingData, xyzCoords)
-                }
-
-                ;send to next row to deposit, don't need to get coordinates as often this way
-                else
-                {
-                    centerPlayer(nextRowCoords, sneakTime, walkTime, facingData, xyzCoords)
-                }
-            
-                ;deposits items into the chest
-                OutputDebug "depositing items`n"
+                sneak(FARMSETTINGS.sneakTime, "w", 1)
+                click "Left"
+                sleep 200
                 click "Right"
-                sleep 1000
-                cursorCoords := Coordinates(topLeftInv.x, topLeftInv.y, topLeftInv.z)
-                loop 3
-                {
-                    loop 9
-                    {
-                        Send "{Shift down}"
-                        sleep 200
-                        click cursorCoords.x, cursorCoords.y
-                        sleep 200
-                        Send "{Shift up}"
-                        sleep 200
-                        cursorCoords.x += boxSize
-                    }
-                    cursorCoords := Coordinates(topLeftInv.x, cursorCoords.y + boxSize, 0)
-                }
-                Send "{Escape}"
-                OutputDebug "items deposited`n"
-            
-                ;moves the current row over one block to the right
-                currentRowCoords := getNextRow(currentRowCoords, facingData)
-                nextRowCoords := getNextRow(currentRowCoords, facingData)
+                sleep 200
             }
-            ;moves the current row over one block to the right, moves player to next section
+            
+            OutputDebug "row " rowCount " harvested`n"
+
+            ;if on the last row of the section, deposit in the chest on the current row
+            if(rowCount = FARMSETTINGS.rowsPerSection)
+            {
+                OutputDebug "going to current row`n"
+                centerPlayer(currentRowCoords, FARMSETTINGS.sneakTime, FARMSETTINGS.walkTime, facingData, xyzCoords)
+            }
+
+            ;send to next row to deposit, don't need to get coordinates as often this way
+            else
+            {
+                OutputDebug "going to next row: " nextRowCoords.ToString() "`n"
+                centerPlayer(nextRowCoords, FARMSETTINGS.sneakTime, FARMSETTINGS.walkTime, facingData, xyzCoords)
+            }
+            
+            ;deposits items into the chest
+            OutputDebug "depositing items`n"
+            click "Right"
+            sleep 1000
+            cursorCoords := Coordinates(FARMSETTINGS.topLeftInv.x, FARMSETTINGS.topLeftInv.y, FARMSETTINGS.topLeftInv.z)
+            loop 3
+            {
+                loop 9
+                {
+                    Send "{Shift down}"
+                    sleep 200
+                    click cursorCoords.x, cursorCoords.y
+                    sleep 200
+                    Send "{Shift up}"
+                    sleep 200
+                    cursorCoords.x += FARMSETTINGS.boxSize
+                }
+                cursorCoords := Coordinates(FARMSETTINGS.topLeftInv.x, cursorCoords.y + FARMSETTINGS.boxSize, 0)
+            }
+            Send "{Escape}"
+            OutputDebug "items deposited`n"
+        
+            ;moves the current row over one block to the right
             currentRowCoords := getNextRow(currentRowCoords, facingData)
             nextRowCoords := getNextRow(currentRowCoords, facingData)
-            centerPlayer(currentRowCoords, sneakTime, walkTime, facingData, xyzCoords)
         }
-        ;sets the current row to the stairwell and moves there
+        ;moves the current row over one block to the right, moves player to next section
         currentRowCoords := getNextRow(currentRowCoords, facingData)
         nextRowCoords := getNextRow(currentRowCoords, facingData)
-        centerPlayer(currentRowCoords, sneakTime, walkTime, facingData, xyzCoords)
-        walk(walkTime, "w", 6)
-        walk(walkTime, "d", 2)
-        walk(walkTime, "s", 6)
+        centerPlayer(currentRowCoords, FARMSETTINGS.sneakTime, FARMSETTINGS.walkTime, facingData, xyzCoords)
     }
-    MsgBox "Harvest Complete OwO"
-    ExitApp
+    ;sets the current row to the stairwell and moves there
+    currentRowCoords := getNextRow(currentRowCoords, facingData)
+    nextRowCoords := getNextRow(currentRowCoords, facingData)
+    centerPlayer(currentRowCoords, FARMSETTINGS.sneakTime, FARMSETTINGS.walkTime, facingData, xyzCoords)
+    walk(FARMSETTINGS.walkTime, "w", 6)
+    walk(FARMSETTINGS.walkTime, "d", 2)
+    walk(FARMSETTINGS.walkTime, "s", 6)
 }
+MsgBox "Harvest Complete OwO"
+ExitApp
