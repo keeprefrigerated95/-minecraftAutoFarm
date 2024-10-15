@@ -75,7 +75,7 @@ walk(timer, key, numSteps)
  ******************************************************/
 readScreen(coordsToRead)
 {
-    OutputDebug "READSCREEN`ncoordsToRead: " coordsToRead.ToString() "`n"
+    ;OutputDebug "READSCREEN`ncoordsToRead: " coordsToRead.ToString() "`n"
 
     ;arrays of the pixels in various letters and numbers
     ;0 is no pixel, 1 is a lit pixel, 2 can be either lit or until  
@@ -268,7 +268,7 @@ readScreen(coordsToRead)
     if(isMinusSign)
         output := "-"
 
-    OutputDebug "output: " output "`n`n"
+    ;OutputDebug "output: " output "`n`n"
     return output
 }
 /*******************************************************
@@ -315,8 +315,8 @@ getCoords(XYZcoords)
     yValues := Array()
     zValues := Array()
 
-    OutputDebug "`n----------------`nGET COORDS START`n"
-    OutputDebug "topLeftCoords: " topLeftCoords.ToString() "`n----------------`n"
+    ;OutputDebug "`n----------------`nGET COORDS START`n"
+    ;OutputDebug "topLeftCoords: " topLeftCoords.ToString() "`n----------------`n"
 
     /*quit loop 0 assigns the x value
       1 assigns y, 2 assigns z, 3 quits the loop */
@@ -365,7 +365,6 @@ getCoords(XYZcoords)
                 if(quitLoop = 0)
                 {
                     xValues.Push(numToPush)
-                     OutputDebug "numToPuch: " numToPush "`n"
                 }
 
                 if(quitLoop = 1)
@@ -377,11 +376,6 @@ getCoords(XYZcoords)
                 {
                     zValues.Push(numToPush)
                 }
-            }
-
-            else
-            {
-                OutputDebug "no text found`n"
             }
         }
         ;moves to the next number in the row
@@ -445,33 +439,10 @@ getCoords(XYZcoords)
 
     output := Coordinates(xIn, yIn, zIn)
 
-    OutputDebug "`n----------------`nGETCOORDS END`n"
-    OutputDebug "output coordinates: " output.ToString() "`n----------------`n"
+    ;OutputDebug "`n----------------`nGETCOORDS END`n"
+    ;OutputDebug "output coordinates: " output.ToString() "`n----------------`n"
     return output
 }
-
-/*************************************************
-* GETDIRECTION
-* gets the direction in which the player is facing
-* returns a string n, s, e or w
-* xyzCoords: the coordinates of "XYZ:" on the minecraft debug screen
-*************************************************/
-getDirection(xyzCoords)
-{
-    topLeftCoords := Coordinates(xyzCoords.x + 76, xyzCoords.y + 54, 0)
-    textWidth := 5
-    textHeight := 7
-    direction := ""
-
-    ;OutputDebug "`n----------------`nGETDIRECTION`nxyzCoords: " xyzCoords.ToString() "`n"
-
-    direction := readScreen(topLeftCoords)
-    
-    ;OutputDebug "OUTPUT`n"
-    ;OutputDebug "direction: " direction "`n----------------`n"
-    return direction
-}
-
 
 /***************************************************
  * CENTER COORDINATES
@@ -553,8 +524,9 @@ centerPlayer(targetCoords, sneakTimer, walkTimer, facingData, xyzCoords)
     zIsCentered := 0
     xIsCentered := 0
 
-    OutputDebug "`n----------------`nCENTER PLAYER`nINPUT`n"
-    OutputDebug "targetCoords: " targetCoords.ToString() "`ncurrentCoordinates: " currentCoords.ToString() "`n"
+    ;OutputDebug "`n----------------`nCENTER PLAYER`nINPUT`n"
+    ;OutputDebug "targetCoords: " targetCoords.ToString() "`ncurrentCoordinates: " currentCoords.ToString() "`n"
+    ;OutputDebug "Direction: " facingData.cardinalDir "`npositiveX: " facingData.positiveX "`nnegativeX: " facingData.negativeX "`npositiveZ: " facingData.positiveZ "`nnegativeZ: " facingData.negativeZ "`n"
 
     ;take the player to the correct coordinates
     while(centered = 0)
@@ -563,27 +535,29 @@ centerPlayer(targetCoords, sneakTimer, walkTimer, facingData, xyzCoords)
         {
             walk(walkTimer, facingData.positiveX, targetCoords.x - currentCoordsCenter.x)
             currentCoords := getCoords(xyzCoords)
+            currentCoordsCenter := centerCoordinates(currentCoords)
         }
     
         else if(targetCoords.x < currentCoordsCenter.x)
         {
             walk(walkTimer, facingData.negativeX, currentCoordsCenter.x - targetCoords.x)
             currentCoords := getCoords(xyzCoords)
+            currentCoordsCenter := centerCoordinates(currentCoords)
         }
     
         if(targetCoords.z > currentCoordsCenter.z)
         {
             walk(walkTimer, facingData.positiveZ, targetCoords.z - currentCoordsCenter.z)
             currentCoords := getCoords(xyzCoords)
+            currentCoordsCenter := centerCoordinates(currentCoords)
         }
             
         else if(targetCoords.z < currentCoordsCenter.z)
         {
             walk(walkTimer, facingData.negativeZ, currentCoordsCenter.z - targetCoords.z)
             currentCoords := getCoords(xyzCoords)
+            currentCoordsCenter := centerCoordinates(currentCoords)
         }
-
-        currentCoordsCenter := centerCoordinates(currentCoords)
 
         if(targetCoords.x = currentCoordsCenter.x and targetCoords.z = currentCoordsCenter.z)
         {
@@ -591,7 +565,7 @@ centerPlayer(targetCoords, sneakTimer, walkTimer, facingData, xyzCoords)
         }
     }
     
-    OutputDebug "Arrived at block`n"
+    ;OutputDebug "Arrived at block`n"
     
     ;centers the player on the block itself
     centered := 0
@@ -630,7 +604,7 @@ centerPlayer(targetCoords, sneakTimer, walkTimer, facingData, xyzCoords)
             currentCoords := getCoords(xyzCoords)
         }
     }
-    OutputDebug "Centered on Block`n-----------------------`n"
+    ;OutputDebug "Centered on Block`n-----------------------`n"
 }
     
     
@@ -644,7 +618,7 @@ getNextRow(currentRow, facingData)
 {
     nextRow := Coordinates()
     
-    OutputDebug "`n---------------`nGETNEXTROW`nCurrent Row: " currentRow.ToString() "`nFacing: " facingData.cardinalDir "`n"
+    ;OutputDebug "`n---------------`nGETNEXTROW`nCurrent Row: " currentRow.ToString() "`nFacing: " facingData.cardinalDir "`n"
      
     if(facingData.cardinalDir = "n")
     {
@@ -666,7 +640,7 @@ getNextRow(currentRow, facingData)
         nextRow := Coordinates(currentRow.x, currentRow.y, currentRow.z - 1)
     }
     
-    OutputDebug "nextRowCoords: " nextRow.ToString() "`n------------------`n"
+    ;OutputDebug "nextRowCoords: " nextRow.ToString() "`n------------------`n"
     return centerCoordinates(nextRow)
 }
  
@@ -732,7 +706,6 @@ setUpWindow()
                     {
                         if (WinExist("ahk_id" openWindows[count]))
                         {
-                            OutputDebug WinGetTitle("ahk_id" openWindows[count]) "`n"
                             isMinecraft := MsgBox("Is this Minecraft? - " WinGetTitle("ahk_id" openWindows[count]), "Manual Search", "YesNo Icon?")
 
                             if(isMinecraft = "Yes")
@@ -826,9 +799,11 @@ OutputDebug "INITIAL COORDS: " initialCoords.ToString() "`n"
 
 ;sets up the facing data variable
 facingData := Direction(,,,,)
-nseORw := getDirection(xyzCoords)
-facingData.setDirection(nseORw)
- 
+coordsOnDebug := Coordinates(xyzCoords.x + 76, xyzCoords.y + 54, 0)
+nseOrw := readScreen(coordsOnDebug)
+OutputDebug ("Direction: " nseOrw)
+facingData.setDirection(nseOrw)
+
 OutputDebug "variables set`n"
 
 /*completes the harvest, storage, and replanting process for all layers*/
@@ -902,6 +877,7 @@ loop FARMSETTINGS.layers
                 cursorCoords := Coordinates(FARMSETTINGS.topLeftInv.x, cursorCoords.y + FARMSETTINGS.boxSize, 0)
             }
             Send "{Escape}"
+            sleep 1000
             OutputDebug "items deposited`n"
         
             ;moves the current row over one block to the right
@@ -910,7 +886,7 @@ loop FARMSETTINGS.layers
         }
         ;moves the current row over one block to the right, moves player to next section
         currentRowCoords := getNextRow(currentRowCoords, facingData)
-        nextRowCoords := getNextRow(currentRowCoords, facingData)
+        nextRowCoords := getNextRow(currentRowCoords, facingData) 
         centerPlayer(currentRowCoords, FARMSETTINGS.sneakTime, FARMSETTINGS.walkTime, facingData, xyzCoords)
     }
     ;sets the current row to the stairwell and moves there
