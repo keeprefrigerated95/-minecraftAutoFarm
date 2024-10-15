@@ -1,8 +1,33 @@
 ~~~~~~~~~~~~~ Auto Farm ~~~~~~~~~~~~~
- An Auto Hot Key script that will
+ An Auto Hot Key Version 2 script that will
  harvest and replant a field of
  crops in Minecraft
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*************************
+ RUNNING THE SCRIPT
+*************************
+Download the autoFarm.exe file and the autoFarmSettings.txt file from the GitHub.
+
+https://github.com/keeprefrigerated95/-minecraftAutoFarm/tree/main
+
+Double click the exe file to run the program. Make sure that the .exe file and .txt file are
+in the same directory (folder).
+
+The script will make the player harvest and plant crops from right to left, top to bottom, like
+reading the words on this page. After one row is harvested the script walks the player back to the
+chest at the beginning of the row and deposits everything in inventory, excluding the hot bar.
+
+After running the script, position your character in the starting position,
+looking straight down, and facing towards the end of the first row. Make sure
+That they are facing as straight as possible. When ready, press the 'r' key
+to run the harvest process.
+
+Make sure your inventory is completely empty and that seeds or crops are in your off hand.
+You may optionally hold a hoe in your main hand. Nothing from your hot bar will be deposited,
+only items from your inventory.
+
+At any time if you need to kill the script, press the X key. To pause the script, press P.
 
 *************************
  FIELD SETUP
@@ -14,7 +39,7 @@ o: water blocks
 H: Hopper/chest/barrel
 P: character starting position
 S: a descending stair block, leading to the next layer
--: and empty space
+-: an empty space
 
 
 All the blocks in this diagram are at the same Y coordinate, with the exception of stairs. 
@@ -33,25 +58,6 @@ Hxxxxxxxxxx V
 -oooooooooo
 -----------
 -SSSS------
-
-*************************
- CONTROLLING THE SCRIPT
-*************************
-The script will make the player harvest and plant crops from right to left, top to bottom, like
-reading the words on this page. After one row is harvested the script walks the player back to the
-chest at the beginning of the row and deposits everything in inventory, excluding the hot bar.
-
-After running the script, position your character in the starting position,
-looking straight down, and facing towards the end of the first row. Make sure
-That they are facing as straight as possible. When ready, press the 'r' key
-to run the harvest process.
-
-Make sure your inventory is completely empty and that seeds or crops are in your off hand.
-You may optionally hold a hoe in your main hand. Nothing from your hot bar will be deposited,
-only items from your inventory.
-
-At any time if you need to kill the script, press the x key. If the x key doesn't work try 
-pressing shift and then x.
 
 *************************
 SETTINGS
@@ -74,9 +80,9 @@ walkTime: The time in milliseconds that it takes for your character to move one 
 
 depositContainer: the type of container you will be depositing items in. valid types are single, double, hopper, or barrel
 
-windowName: The name of the Minecraft window. This can usually be found in the title bar of the window (ie. Minecraft 1.21.1 - Singleplayer). If this variable is omitted from the settings file, the program will search for an open window with "Minecraft" at the beginning of the title.
+windowName: The name of the Minecraft window. This can usually be found in the title bar of the window (ie. Minecraft 1.21.1 - Singleplayer). If this variable is omitted from the settings file, the program will search for an open window with "Minecraft" at the beginning of the title. You can manually search for the Minecraft with the program as well.
 
-*Due to the granularity of the OS's time-keeping system, the script will typically round tese values up to the nearest multiple
+*Due to the granularity of the OS's time-keeping system, the script will typically round these values up to the nearest multiple
 of 10 or 15.6 milliseconds. Sever lag can also effect this. Essentially, no matter how you adjust this variable, some crops will
 probably be missed, especially if you have very long rows. If the script had to check the coordinates at every single block, all
 the blocks could be harvested, but it would take a very, very long time. I sacrificed a little accuracy for a whole lot of speed
