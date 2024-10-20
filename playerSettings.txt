@@ -1,2 +1,0 @@
-sneakTime:772
-walkTime:231
