@@ -8,21 +8,11 @@
 #Include player.ahk
 #Include farm.ahk
 
-/*
-try
-    FARMSETTINGS.loadFromFile("autoFarmSettings.txt")
-catch
-{
-    MsgBox "autoFarmSettings.txt not found!", "Error", "Iconx"
-    ExitApp
-}
-*/
-
 /*********************************************************
 * GET NEXT ROW
 * returns the coordinates of the row directly to the right of the player
 * currentRow: the coordinates of the current row
-* steve.direction: info about which way the player is facing
+* facingData: info about which way the player is facing
 **********************************************************/
 getNextRow(currentRow, facingData)
 {
@@ -66,6 +56,10 @@ getNextRow(currentRow, facingData)
     ExitApp
 }
 
+/************************************************
+ * P HOTKEY
+ * Press 'p' to pause the script at any time
+ ************************************************/
 *p::
 {
     OutputDebug "PAUSED`n"
