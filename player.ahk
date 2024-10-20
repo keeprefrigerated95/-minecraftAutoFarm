@@ -11,7 +11,7 @@
 
 class Player {
     
-    settingsFile := "playerSettings.txt"
+    settingsFile := "settings.txt"
 
     __New(position := Coordinates(), direction := Facing(), minecraft := MinecraftWin(), sneakTime := 772, walkTime := 231) {
         
@@ -310,6 +310,15 @@ class Player {
                 }
             }
         }
-    }
 
+        if(this.sneakTime = "")
+        {
+            this.sneakTime := 772
+        }
+
+        if(this.sneakTime = "")
+        {
+            this.sneakTime := 231
+        }
+    }
 }
