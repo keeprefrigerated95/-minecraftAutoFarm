@@ -7,7 +7,7 @@
 *************************
  RUNNING THE SCRIPT
 *************************
-Download the autoFarm.exe file and the autoFarmSettings.txt file from the GitHub.
+Download the autoFarm.exe file and the settings.txt file from the GitHub.
 
 https://github.com/keeprefrigerated95/-minecraftAutoFarm/tree/main
 
@@ -62,7 +62,7 @@ Hxxxxxxxxxx V
 *************************
 SETTINGS
 *************************
-The script reads settings from the text file autoFarmSettings.txt, giving you the ability to customize
+The script reads settings from the text file settings.txt, giving you the ability to customize
 the script to your farm layout. These are the following parameters:
 
 layers: The number of layers of farm fields stacked on top of each other, all layers must be identical
@@ -74,13 +74,11 @@ rowsPerSection: The number of rows in a single section. Every section must have 
 
 rowLength: The length of each row. In the diagram above, this would be 10. All the rows must have the same length.
 
-sneakTime: The time in milliseconds that it takes for your character to move one block while crouching, aka sneaking. *see note below
+sneakTime: The time in milliseconds that it takes for your character to move one block while crouching, aka sneaking. If ommitted defaults to 772. *see note below
 
-walkTime: The time in milliseconds that it takes for your character to move one block while walking. *see note below
+walkTime: The time in milliseconds that it takes for your character to move one block while walking. If ommitted defaults to 231. *see note below
 
-depositContainer: the type of container you will be depositing items in. valid types are single, double, hopper, or barrel
-
-windowName: The name of the Minecraft window. This can usually be found in the title bar of the window (ie. Minecraft 1.21.1 - Singleplayer). If this variable is omitted from the settings file, the program will search for an open window with "Minecraft" at the beginning of the title. You can manually search for the Minecraft with the program as well.
+windowName: The name of the Minecraft window. This can usually be found in the title bar of the window (ie. Minecraft 1.21.1 - Singleplayer). If omitted, the program will search for an open window with "Minecraft" at the beginning of the title.
 
 *Due to the granularity of the OS's time-keeping system, the script will typically round these values up to the nearest multiple
 of 10 or 15.6 milliseconds. Sever lag can also effect this. Essentially, no matter how you adjust this variable, some crops will
