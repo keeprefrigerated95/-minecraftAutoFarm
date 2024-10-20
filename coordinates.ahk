@@ -17,4 +17,63 @@ class Coordinates {
     ToString() {
         Return Format('({1}, {2}, {3})', this.x, this.y, this.z)
     }
+
+    /***************************************************
+     * CENTER COORDINATES
+     * gives the exact center coordinates of the block that
+     * is given, rounds to 0.5
+     ****************************************************/
+    centerCoordinates()
+    {
+        ;OutputDebug "`n-----------------`nCENTER COORDINATES`ninputCoords: " inputCoords.ToString() "`n"
+
+        outputCoords := Coordinates()
+        roundedX := 0.0
+        roundedY := 0.0
+        roundedZ := 0.0
+
+        
+        if(this.x < 0)
+        {
+            roundedX := Float(Integer(this.x))
+            centeredX := roundedX - 0.5
+        }
+        
+    
+        if(this.x >= 0.0)
+        {
+            roundedX := Float(Integer(this.x))
+            centeredX := roundedX + 0.5
+        }
+
+        if(this.y < 0.0)
+        {
+            roundedY := Float(Integer(this.y))
+            centeredY := roundedY - 0.5
+        }
+        
+        if(this.y >= 0.0)
+        {
+            roundedY := Float(Integer(this.y))
+            centeredY := roundedY + 0.5
+        }
+
+        if(this.z < 0.0)
+        {
+            roundedZ := Float(Integer(this.z))
+            centeredZ := roundedZ - 0.5
+        }
+            
+        if(this.z >= 0.0)
+        {
+            roundedZ := Float(Integer(this.z))
+            centeredZ := roundedZ + 0.5
+        }
+
+        outputCoords := Coordinates(centeredX, centeredY, centeredZ)
+
+        ;OutputDebug "outputCoords: " outputCoords.ToString() "`n-------------------`n"
+
+        return outputCoords
+    }
 }
