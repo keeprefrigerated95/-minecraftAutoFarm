@@ -1,7 +1,0 @@
-layers:2
-sectionsPerLayer:13
-rowsPerSection:4
-rowLength:72
-sneakTime:772
-walkTime:231
-depositContainer:double
