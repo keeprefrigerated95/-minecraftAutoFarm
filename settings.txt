@@ -1,0 +1,11 @@
+Farm Settings
+----------------
+layers:2
+sectionsPerLayer:13
+rowsPerSection:4
+rowLength:72
+
+Player Settings
+---------------
+sneakTime:772
+walkTime:231
