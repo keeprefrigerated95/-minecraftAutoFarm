@@ -18,10 +18,9 @@ The script will make the player harvest and plant crops from right to left, top 
 reading the words on this page. After one row is harvested the script walks the player back to the
 chest at the beginning of the row and deposits everything in inventory, excluding the hot bar.
 
-After running the script, position your character in the starting position,
+Before you begin harvesting, position your character in the starting position,
 looking straight down, and facing towards the end of the first row. Make sure
-That they are facing as straight as possible. When ready, press the 'r' key
-to run the harvest process.
+That they are facing as straight as possible.
 
 Make sure your inventory is completely empty and that seeds or crops are in your off hand.
 You may optionally hold a hoe in your main hand. Nothing from your hot bar will be deposited,
