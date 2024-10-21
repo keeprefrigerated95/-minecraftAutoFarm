@@ -377,6 +377,7 @@ class MinecraftWin {
             MsgBox "Unable to read the Minecraft Debug Screen!", "ERROR", "Iconx"
             ExitApp
         }
+        OutputDebug "Window has been set up`n"
     }
 
     /****************************************************
@@ -397,8 +398,8 @@ class MinecraftWin {
         yValues := Array()
         zValues := Array()
 
-        ;OutputDebug "`n----------------`nGET COORDS START`n"
-        ;OutputDebug "topLeftCoords: " topLeftCoords.ToString() "`n----------------`n"
+        OutputDebug "`n----------------`nGET COORDS START`n"
+        OutputDebug "topLeftCoords: " topLeftCoords.ToString() "`n----------------`n"
 
         /*quit loop 0 assigns the x value
         1 assigns y, 2 assigns z, 3 quits the loop */
@@ -521,8 +522,8 @@ class MinecraftWin {
 
         output := Coordinates(xIn, yIn, zIn)
 
-        ;OutputDebug "`n----------------`nGETCOORDS END`n"
-        ;OutputDebug "output coordinates: " output.ToString() "`n----------------`n"
+        OutputDebug "`n----------------`nGETCOORDS END`n"
+        OutputDebug "output coordinates: " output.ToString() "`n----------------`n"
         return output
     }
 
@@ -532,8 +533,139 @@ class MinecraftWin {
      *****************************************************/
     getFacing()
     {
-        direction := Facing()
-        direction.setDirection(this.readChar(this.facingCoords, this.debugTextColor))
+        OutputDebug "`n---------------`nGET FACING`n"
+        textWidth := 5
+        textHeight := 7
+        yawIsNegative := 1.0
+        pitchIsNegative := 1.0
+        yawValues := Array()
+        pitchValues := Array()
+        
+        direction := Facing(this.readChar(this.facingCoords, this.debugTextColor))
+        topLeftCoords := Coordinates()
+
+        if(direction.cardinalDir = "n")
+            topLeftCoords := Coordinates(this.facingCoords.x + 292, this.facingCoords.y, 0)
+        
+        else if(direction.cardinalDir = "s")
+            topLeftCoords := Coordinates(this.facingCoords.x + 284, this.facingCoords.y, 0)
+
+        else if(direction.cardinalDir = "e")
+            topLeftCoords := Coordinates(this.facingCoords.x + 272, this.facingCoords.y, 0)
+
+        else if(direction.cardinalDir = "w")
+            topLeftCoords := Coordinates(this.facingCoords.x + 280, this.facingCoords.y, 0)
+ 
+        else
+        {
+            MsgBox("Unable to read direction", "ERROR", "Iconx")
+            ExitApp
+        }
+
+        OutputDebug "Facing: " direction.cardinalDir "`n"
+
+        ;N 373  S 365  E 353  W 361
+
+        /*quit loop 0 assigns the yaw
+        1 assigns pitch, 2 quits the loop */
+        quitLoop := 0
+        while (quitLoop < 2)
+        {
+
+            ;the number that is to be added
+            numToPush := this.readChar(topLeftCoords, this.debugTextColor)
+            OutputDebug "numToPush: " numToPush "`n"
+            ;check to see if there is a decimal and adjst x coordinate to read the
+            ;number, not the decimal
+            goToNextCoord := 0 ;tells the loop to 
+            if (numToPush = ".")
+            {
+                topLeftCoords.x += 4
+                numToPush := this.readChar(topLeftCoords, this.debugTextColor)
+                goToNextCoord := 1
+            }
+
+            ;check if the coordinate is a negative symbol
+            if (numToPush = "-")
+            {
+                if(quitLoop = 0)
+                {
+                    yawIsNegative := -1.0
+                }
+                
+                if(quitLoop = 1)
+                {
+                    pitchIsNegative := -1.0
+                }
+            }
+            
+            ;if not a negative symbol, figures out which number is being read, if any
+            else
+            {
+                ;pushes the number that was read to the appropriate array
+                if (numToPush != "no text found")
+                {
+                    if(quitLoop = 0)
+                    {
+                        yawValues.Push(numToPush)
+                    }
+
+                    if(quitLoop = 1)
+                    {
+                        pitchValues.Push(numToPush)
+                    }
+                }
+            }
+            ;moves to the next number in the row
+            if(goToNextCoord = 0)
+            {
+                topLeftCoords.x += 12
+            }
+
+            ;ends the loop
+            if(goToNextCoord = 1 and quitLoop = 1)
+            {
+                quitLoop := quitLoop + 1
+            }
+
+            ;moves to the Pitch
+            if(goToNextCoord = 1 and quitLoop = 0)
+            {
+                quitLoop := quitLoop + 1
+                topLeftCoords.x += 40
+            }
+        }
+        
+        ;converts the arrays to floats and returns the coordinates
+        yawIn := 0.0
+        pitchIn := 0.0
+
+        multiplier := 0.1
+        xArrayLength := pitchValues.Length
+        loop xArrayLength
+        {
+            yawIn := yawIn + (yawValues.Pop() * multiplier)
+            multiplier := multiplier * 10.0
+        }
+        yawIn := yawIn * yawIsNegative
+
+        multiplier := 0.1
+        yArrayLength := pitchValues.Length
+        loop yArrayLength
+        {
+            pitchIn := pitchIn + (pitchValues.Pop() * multiplier)
+            multiplier := multiplier * 10.0
+        }
+        pitchIn := pitchIn * pitchIsNegative
+
+        
+
+        ;OutputDebug "`n----------------`nGETCOORDS END`n"
+        OutputDebug "output facing`n" direction.ToString() "`n----------------`n"
+       
+        direction.yaw := yawIn
+        direction.pitch := pitchIn
+
         return direction
     }
 }
