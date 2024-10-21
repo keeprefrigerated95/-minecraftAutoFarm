@@ -10,16 +10,17 @@
  ******************************************************/
 
 class Player {
-    
     settingsFile := "settings.txt"
+    sneakTime := 772
+    walkTime := 231
+    minecraft := MinecraftWin()
+    position := this.minecraft.getCoords() ;current coordinates
+    direction := this.minecraft.getFacing() ;get current facing data
 
-    __New(position := Coordinates(), direction := Facing(), minecraft := MinecraftWin(), sneakTime := 772, walkTime := 231) {
-        
-        this.position := position
-        this.direction := direction
-        this.minecraft := minecraft
-        this.sneakTime := sneakTime ;time in milliseconds to walk one block while sneaking
-        this.walkTime := walkTime ;time in milliseconds to walk one block
+    __New()
+    {
+        this.loadFromFile() ;load vars from settings
+        OutputDebug "Coordinates at birth: " this.position.ToString() "`nDirection at birth: " this.direction.ToString() "`n"
     }
 
     /*****************************************
