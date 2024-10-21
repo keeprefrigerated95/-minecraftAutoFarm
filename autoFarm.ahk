@@ -89,11 +89,10 @@ if(result = "Cancel")
 
 CoordMode "Pixel", "Client"
 steve := Player()
-steve.loadFromFile()
 theFarm := Farm() ;all of the settings for the farm
 
 initialCoords := steve.setGetPosition() ;coordinates where the player starts
-initialFacing := steve.setGetDirection() ;the players beginning facing data
+;initialFacing := steve.setGetDirection() ;the players beginning facing data
 
 ;completes the harvest, storage, and replanting process for all layers
 loop theFarm.layers
