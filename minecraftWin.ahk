@@ -13,6 +13,7 @@ class MinecraftWin {
     
     xyz := Coordinates(5, 113, 0)
     facingCoords := Coordinates()
+    crosshair := Coordinates(419, 260, 0)
     debugTextColor := "0xdddddd"
     menuTextColor := "0xfcfcfc"
     invTextColor := "0x3f3f3f"
