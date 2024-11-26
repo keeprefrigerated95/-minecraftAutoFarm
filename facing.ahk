@@ -7,15 +7,19 @@
 
 class Facing {
     
+    ;which buttons need to be pressed to move the player in a positve or negative direction
+    positiveX := ""
+    negativeX := ""
+    positiveZ := ""
+    negativeZ := ""
+    yaw := 0
+    pitch := 0
+
     ; this method is called when a new instance is created 
-    __New(cardinalDir:="", positiveX:="", negativeX:="", positiveZ:="", negativeZ:="") {
+    __New(cardinalDir:="") {
         ; assign the parameters to instance variables 
         this.cardinalDir := cardinalDir
-        ;which buttons need to be pressed to move the player in a positve or negative direction
-        this.positiveX := positiveX
-        this.negativeX := negativeX
-        this.positiveZ := positiveZ
-        this.negativeZ := negativeZ
+        this.setDirection(this.cardinalDir)
     }
     
     ;sets the direction and the positive/negative x and y based on the direction facing
@@ -66,7 +70,7 @@ class Facing {
     ; this method is used by the String class and is useful for printing/msg boxes
     ToString() {
         ;Return Format('({1}, {2}, {3})', this.cardinalDir, this.positiveX, this.negativeX, this.positiveZ, this.negativeZ)
-        output := "Direction: " this.cardinalDir
+        output := "Direction: " this.cardinalDir "`nYaw: " this.yaw "`nPitch: " this.pitch "`n"
         return output
     }
 }
