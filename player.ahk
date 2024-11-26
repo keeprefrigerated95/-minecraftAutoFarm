@@ -2,7 +2,7 @@
 #Include minecraftWin.ahk
 #Include coordinates.ahk
 #Include facing.ahk
-
+CoordMode "Pixel", "Client"
 /******************************************************
  * PLAYER
  * A class with data and methods related to the minecraft
@@ -285,6 +285,52 @@ class Player {
         }
         Send "{Escape}"
         sleep 1000
+    }
+
+    /**********************************************
+     * TURN
+     * adjusts the players roational poisition
+     * TARGETYAW: the yaw that the player to turn to
+     * TARGETPITCH: the pitch the player will turn to
+     **********************************************/
+    turn(targetYaw, targetPitch)
+    {
+        ;yaw -180 to 180
+        ;pitch -90 to 90
+
+        ;set pitch to 0
+        loop 10
+            MouseMove(0, -1, 100, "R")
+        
+        exitLoop := 0
+        while(exitLoop = 0)
+        {
+            /*
+            if(this.direction.pitch > 75)
+            {
+                loop 5
+                    MouseMove(0, -1, 100, "R")
+                this.direction := this.minecraft.getFacing()
+            }
+            */
+           ;currently makes the player look up 90 degrees
+            if(this.direction.pitch > 0)
+            {
+                loop 1
+                    MouseMove(0, -1, 100, "R")
+                this.direction := this.minecraft.getFacing()
+            }
+
+            if(this.direction.pitch < 5)
+                exitLoop := 1
+        }
+        
+
+        ;set to targetYaw
+
+        ;set to targetPitch
+
+        
     }
 
     /*********************************************
