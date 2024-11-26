@@ -7,7 +7,7 @@
 
 class Farm {
     
-    settingsFile := "farmSettings.txt"
+    settingsFile := "settings.txt"
 
     ; this method is called when a new instance is created 
     __New(layers := 0, sectionsPerLayer := 0, rowsPerSection := 0, rowLength := 0, depositContainer := "Double") {
@@ -67,29 +67,6 @@ class Farm {
                 }
             }
         }
-
-        ;sets proper coordinates for target deposit container
-        /*
-        if(farmSettings.depositContainer = "single")
-        {
-            this.topLeftInv := Coordinates(276, 270, 0)
-        }
-
-        if(farmSettings.depositContainer = "barrel")
-        {
-            this.topLeftInv := Coordinates(276, 270, 0)
-        }
-
-        if(farmSettings.depositContainer = "double")
-        {
-            this.topLeftInv := Coordinates(276, 323, 0)
-        }
-
-        if(farmSettings.depositContainer = "hopper")
-        {
-            this.topLeftInv := Coordinates(276, 237, 0)
-        }
-        */
     }
 }
 
