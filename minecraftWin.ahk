@@ -575,7 +575,6 @@ class MinecraftWin {
 
             ;the number that is to be added
             numToPush := this.readChar(topLeftCoords, this.debugTextColor)
-            OutputDebug "numToPush: " numToPush "`n"
             ;check to see if there is a decimal and adjst x coordinate to read the
             ;number, not the decimal
             goToNextCoord := 0 ;tells the loop to 
@@ -587,7 +586,7 @@ class MinecraftWin {
             }
 
             ;check if the coordinate is a negative symbol
-            if (numToPush = "-")
+            else if (numToPush = "-")
             {
                 if(quitLoop = 0)
                 {
@@ -642,8 +641,8 @@ class MinecraftWin {
         pitchIn := 0.0
 
         multiplier := 0.1
-        xArrayLength := pitchValues.Length
-        loop xArrayLength
+        yawArrayLength := yawValues.Length
+        loop yawArrayLength
         {
             yawIn := yawIn + (yawValues.Pop() * multiplier)
             multiplier := multiplier * 10.0
@@ -651,8 +650,8 @@ class MinecraftWin {
         yawIn := yawIn * yawIsNegative
 
         multiplier := 0.1
-        yArrayLength := pitchValues.Length
-        loop yArrayLength
+        pitchArrayLength := pitchValues.Length
+        loop pitchArrayLength
         {
             pitchIn := pitchIn + (pitchValues.Pop() * multiplier)
             multiplier := multiplier * 10.0
