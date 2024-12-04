@@ -2,6 +2,8 @@
 #Include minecraftWin.ahk
 #Include coordinates.ahk
 #Include facing.ahk
+#Include logger.ahk
+playerLogger := Logger("player.ahk")
 CoordMode "Pixel", "Client"
 /******************************************************
  * PLAYER
@@ -9,7 +11,8 @@ CoordMode "Pixel", "Client"
  * player
  ******************************************************/
 
-class Player {
+class Player
+{
     settingsFile := "settings.txt"
     sneakTime := 772
     walkTime := 231
@@ -20,7 +23,7 @@ class Player {
     __New()
     {
         this.loadFromFile() ;load vars from settings
-        OutputDebug "Coordinates at birth: " this.position.ToString() "`nDirection at birth: " this.direction.ToString() "`n"
+        playerLogger.sendLog("player.ahk\Player\New\ New Player created")
     }
 
     /*****************************************
@@ -31,6 +34,7 @@ class Player {
     setGetPosition()
     {
         this.position := this.minecraft.getCoords()
+        playerLogger.sendLog("player.ahk\Player\setGetPosition\ Position updated to: " this.position.ToString())
         return this.position
     }
 
@@ -42,10 +46,11 @@ class Player {
     setGetDirection()
     {
         this.direction := this.minecraft.getFacing()
+        playerLogger.sendLog("player.ahk\Player\setGetDirection\ Direction updated to: " this.direction.ToString())
         return this.direction
     }
 
-    /* ***********************************************
+    /*************************************************
     * sneak
     * moves player while sneaking aka crouching
     * timer: how many milliseconds the script will press
@@ -55,11 +60,6 @@ class Player {
     **************************************************/
     sneak(timer, key, numSteps)
     {
-        ;OutputDebug "`n------------`nSTEP`nINPUT`n"
-        ;OutputDebug "timer: " timer "`n"
-        ;OutputDebug "key: " key "`n"
-        ;OutputDebug "numSteps: " numSteps "`n----------------`n"
-
         if(numSteps < 1)
         {
             numSteps := 1
@@ -73,6 +73,8 @@ class Player {
         sleep 100
         Send "{Shift up}"
         sleep 100
+
+        playerLogger.sendLog("player.ahk\Player\sneak\ Sneaked " numSteps " steps, pressing '" key "' at " timer " milliseconds each")
 
         return
     }
@@ -90,6 +92,8 @@ class Player {
         sleep this.walkTime * numSteps
         Send "{" key " up}"
         sleep 100
+
+        playerLogger.sendLog("player.ahk\Player\walk\ Walked " numSteps " steps, pressing '" key "'")
     }
 
     /**************************************************
@@ -103,56 +107,59 @@ class Player {
     **************************************************/
     moveTo(targetCoords)
     {
+        playerLogger.sendLog("player.ahk\Player\moveTo\ Moving player to " targetCoords.ToString())
+
         ;sets the current coordinates
         this.position := this.minecraft.getCoords()
         currentCoordsCenter := this.position.centerCoordinates()
+        targetCoordsCenter := targetCoords.centerCoordinates()
         arrived := 0
 
-        OutputDebug "`n----------------`nCENTER PLAYER`nINPUT`n"
-        OutputDebug "targetCoords: " targetCoords.ToString() "`ncurrentCoordinates: " this.position.ToString() "`n"
-        OutputDebug "Direction: " this.direction.cardinalDir "`npositiveX: " this.direction.positiveX "`nnegativeX: " this.direction.negativeX "`npositiveZ: " this.direction.positiveZ "`nnegativeZ: " this.direction.negativeZ "`n"
 
         ;take the player to the correct coordinates
-        while(arrived = 0)
-        {
-            this.centerOn()
+        if(targetCoordsCenter.x != currentCoordsCenter.x or targetCoordsCenter.z != currentCoordsCenter.z)
+        { 
+            while(arrived = 0)
+            {
+                this.centerOn()
 
-            if(targetCoords.x > currentCoordsCenter.x)
-            {
-                this.walk(this.direction.positiveX, targetCoords.x - currentCoordsCenter.x)
-                this.position := this.minecraft.getCoords()
-                currentCoordsCenter := this.position.centerCoordinates()
-            }
-        
-            else if(targetCoords.x < currentCoordsCenter.x)
-            {
-                this.walk(this.direction.negativeX, currentCoordsCenter.x - targetCoords.x)
-                this.position := this.minecraft.getCoords()
-                currentCoordsCenter := this.position.centerCoordinates()
-            }
-        
-            if(targetCoords.z > currentCoordsCenter.z)
-            {
-                this.walk(this.direction.positiveZ, targetCoords.z - currentCoordsCenter.z)
-                this.position := this.minecraft.getCoords()
-                currentCoordsCenter := this.position.centerCoordinates()
-            }
-                
-            else if(targetCoords.z < currentCoordsCenter.z)
-            {
-                this.walk(this.direction.negativeZ, currentCoordsCenter.z - targetCoords.z)
-                this.position := this.minecraft.getCoords()
-                currentCoordsCenter := this.position.centerCoordinates()
-            }
+                if(targetCoords.x > currentCoordsCenter.x)
+                {
+                    this.walk(this.direction.positiveX, targetCoords.x - currentCoordsCenter.x)
+                    this.position := this.minecraft.getCoords()
+                    currentCoordsCenter := this.position.centerCoordinates()
+                }
+            
+                else if(targetCoords.x < currentCoordsCenter.x)
+                {
+                    this.walk(this.direction.negativeX, currentCoordsCenter.x - targetCoords.x)
+                    this.position := this.minecraft.getCoords()
+                    currentCoordsCenter := this.position.centerCoordinates()
+                }
+            
+                if(targetCoords.z > currentCoordsCenter.z)
+                {
+                    this.walk(this.direction.positiveZ, targetCoords.z - currentCoordsCenter.z)
+                    this.position := this.minecraft.getCoords()
+                    currentCoordsCenter := this.position.centerCoordinates()
+                }
+                    
+                else if(targetCoords.z < currentCoordsCenter.z)
+                {
+                    this.walk(this.direction.negativeZ, currentCoordsCenter.z - targetCoords.z)
+                    this.position := this.minecraft.getCoords()
+                    currentCoordsCenter := this.position.centerCoordinates()
+                }
 
-            if(targetCoords.x = currentCoordsCenter.x and targetCoords.z = currentCoordsCenter.z)
-            {
-                arrived := 1
+                if(targetCoords.x = currentCoordsCenter.x and targetCoords.z = currentCoordsCenter.z)
+                {
+                    arrived := 1
+                }
             }
         }
 
         this.centerOn()
-        OutputDebug "Moved to coordinates`n-----------------------`n"
+        playerLogger.sendLog("player.ahk\Player\moveTo\ Moved player to " this.position.ToString())
     }
 
     /***********************************************
@@ -168,38 +175,118 @@ class Player {
         ;centers the player on the block itself
         centered := 0
         roundedDown := Coordinates(Float(Integer(this.position.x)), Float(Integer(this.position.y)), Float(Integer(this.position.z)))
-        
+
         while (centered = 0)
         {
-            if(Abs(this.position.x - roundedDown.x) >= 0.3 and Abs(this.position.x - roundedDown.x) <= 0.7 and Abs(this.position.z - roundedDown.z) >= 0.3 and Abs(this.position.z - roundedDown.z) <= 0.7)
+            if(Abs(this.position.x - roundedDown.x) >= 0.4 and Abs(this.position.x - roundedDown.x) <= 0.6 and Abs(this.position.z - roundedDown.z) >= 0.4 and Abs(this.position.z - roundedDown.z) <= 0.6)
             {
                 centered := 1
             }
-        
-            else if(this.position.x - roundedDown.x < 0.3 and this.position.x - 0.3 >= 0 or this.position.x - roundedDown.x < -0.7)
+
+            else
             {
-                this.sneak(this.sneakTime / 8, this.direction.positiveX, 1)
-                this.position := this.minecraft.getCoords()
-            }
-        
-            else if(this.position.x - roundedDown.x > 0.7 or this.position.x - roundedDown.x > -0.3 and this.position.x - roundedDown.x <= 0)
-            {
-                this.sneak(this.sneakTime / 8, this.direction.negativeX, 1)
-                this.position := this.minecraft.getCoords()
-            }
-        
-            else if(this.position.z - roundedDown.z < 0.3 and this.position.z - 0.3 >= 0 or this.position.z - roundedDown.z < -0.7)
-            {
-                this.sneak(this.sneakTime / 8, this.direction.positiveZ, 1)
-                this.position := this.minecraft.getCoords()
-            }
-        
-            else if(this.position.z - roundedDown.z > 0.7 or this.position.z - roundedDown.z > -0.3 and this.position.z - roundedDown.z <= 0)
-            {
-                this.sneak(this.sneakTime / 8, this.direction.negativeZ, 1)
-                this.position := this.minecraft.getCoords()
+                ;move in a positive direction on the X axis
+                if(this.position.x - roundedDown.x >= 0 and this.position.x - roundedDown.x < 0.1 or this.position.x - roundedDown.x < -0.9)
+                {
+                    this.sneak(this.sneakTime / 2, this.direction.positiveX, 1)
+                    this.position := this.minecraft.getCoords()
+                }
+            
+                else if(this.position.x - roundedDown.x >= 0.1 and this.position.x - roundedDown.x < 0.2 or this.position.x - roundedDown.x >= -0.9 and this.position.x - roundedDown.x < -0.8)
+                {
+                    this.sneak(this.sneakTime / 4, this.direction.positiveX, 1)
+                    this.position := this.minecraft.getCoords()
+                }
+
+                else if(this.position.x - roundedDown.x >= 0.2 and this.position.x - roundedDown.x < 0.3 or this.position.x - roundedDown.x >= -0.8 and this.position.x - roundedDown.x < -0.7)
+                {
+                    this.sneak(this.sneakTime / 8, this.direction.positiveX, 1)
+                    this.position := this.minecraft.getCoords()
+                }
+
+                else if(this.position.x - roundedDown.x >= 0.3 and this.position.x - roundedDown.x < 0.4 or this.position.x - roundedDown.x >= -0.7 and this.position.x - roundedDown.x < -0.6)
+                {
+                    this.sneak(this.sneakTime / 16, this.direction.positiveX, 1)
+                    this.position := this.minecraft.getCoords()
+                }
+
+                ;move in a negative direction on the X axis
+                else if(this.position.x - roundedDown.x > 0.9 or this.position.x - roundedDown.x <= 0 and this.position.x - roundedDown.x > -0.1 )
+                {
+                    this.sneak(this.sneakTime / 2, this.direction.negativeX, 1)
+                    this.position := this.minecraft.getCoords()
+                }
+                
+                else if(this.position.x - roundedDown.x > 0.8 and this.position.x - roundedDown.x <= 0.9 or this.position.x - roundedDown.x > -0.2 and this.position.x - roundedDown.x <= -0.1)
+                {
+                    this.sneak(this.sneakTime / 4, this.direction.negativeX, 1)
+                    this.position := this.minecraft.getCoords()
+                }
+
+                else if(this.position.x - roundedDown.x > 0.7 and this.position.x - roundedDown.x <= 0.8 or this.position.x - roundedDown.x > -0.3 and this.position.x - roundedDown.x <= -0.2)
+                {
+                    this.sneak(this.sneakTime / 8, this.direction.negativeX, 1)
+                    this.position := this.minecraft.getCoords()
+                }
+                
+                else if(this.position.x - roundedDown.x > 0.6 and this.position.x - roundedDown.x <= 0.7 or this.position.x - roundedDown.x > -0.4 and this.position.x - roundedDown.x <= -0.3)
+                {
+                    this.sneak(this.sneakTime / 16, this.direction.negativeX, 1)
+                    this.position := this.minecraft.getCoords()
+                }
+
+                ;move in a positive direction on the Z axis
+                if(this.position.z - roundedDown.z >= 0 and this.position.z - roundedDown.z < 0.1 or this.position.z - roundedDown.z < -0.9)
+                {
+                    this.sneak(this.sneakTime / 2, this.direction.positiveZ, 1)
+                    this.position := this.minecraft.getCoords()
+                }
+            
+                else if(this.position.z - roundedDown.z >= 0.1 and this.position.z - roundedDown.z < 0.2 or this.position.z - roundedDown.z >= -0.9 and this.position.z - roundedDown.z < -0.8)
+                {
+                    this.sneak(this.sneakTime / 4, this.direction.positiveZ, 1)
+                    this.position := this.minecraft.getCoords()
+                }
+
+                else if(this.position.z - roundedDown.z >= 0.2 and this.position.z - roundedDown.z < 0.3 or this.position.z - roundedDown.z >= -0.8 and this.position.z - roundedDown.z < -0.7)
+                {
+                    this.sneak(this.sneakTime / 8, this.direction.positiveZ, 1)
+                    this.position := this.minecraft.getCoords()
+                }
+
+                else if(this.position.z - roundedDown.z >= 0.3 and this.position.z - roundedDown.z < 0.4 or this.position.z - roundedDown.z >= -0.7 and this.position.z - roundedDown.z < -0.6)
+                {
+                    this.sneak(this.sneakTime / 16, this.direction.positiveZ, 1)
+                    this.position := this.minecraft.getCoords()
+                }
+
+                ;move in a negative direction on the Z axis
+                else if(this.position.z - roundedDown.z > 0.9 or this.position.z - roundedDown.z <= 0 and this.position.z - roundedDown.z > -0.1 )
+                {
+                    this.sneak(this.sneakTime / 2, this.direction.negativeZ, 1)
+                    this.position := this.minecraft.getCoords()
+                }
+                
+                else if(this.position.z - roundedDown.z > 0.8 and this.position.z - roundedDown.z <= 0.9 or this.position.z - roundedDown.z > -0.2 and this.position.z - roundedDown.z <= -0.1)
+                {
+                    this.sneak(this.sneakTime / 4, this.direction.negativeZ, 1)
+                    this.position := this.minecraft.getCoords()
+                }
+
+                else if(this.position.z - roundedDown.z > 0.7 and this.position.z - roundedDown.z <= 0.8 or this.position.z - roundedDown.z > -0.3 and this.position.z - roundedDown.z <= -0.2)
+                {
+                    this.sneak(this.sneakTime / 8, this.direction.negativeZ, 1)
+                    this.position := this.minecraft.getCoords()
+                }
+                
+                else if(this.position.z - roundedDown.z > 0.6 and this.position.z - roundedDown.z <= 0.7 or this.position.z - roundedDown.z > -0.4 and this.position.z - roundedDown.z <= -0.3)
+                {
+                    this.sneak(this.sneakTime / 16, this.direction.negativeZ, 1)
+                    this.position := this.minecraft.getCoords()
+                }
             }
         }
+        playerLogger.sendLog("player.ahk\Player\centerOn\ Centered player on coordinates " this.position.ToString())
     }
 
     /***************************************************
@@ -248,13 +335,13 @@ class Player {
             }
 
             if(containerOpened = 0)
-            {
-                OutputDebug "PAUSED`n"
+            { 
                 Pause -1
+                playerLogger.sendLog("player.ahk\Player\depositInv\ script paused, Failed to open deposit conainer")
                 result := MsgBox("Failed to open deposit conainer. Open the container manually and press Retry or press Cancel to end the script.", "ERROR", "RetryCancel IconX")
                 if (result = "Retry")
                 {
-                    OutputDebug "UNPAUSED`n"
+                    playerLogger.sendLog("player.ahk\Player\depositInv\ script unpaused")
                     Pause -1
                 }
             
@@ -285,6 +372,7 @@ class Player {
         }
         Send "{Escape}"
         sleep 1000
+        playerLogger.sendLog("player.ahk\Player\depositInv\ deposited inventory")
     }
 
     /**********************************************
@@ -346,6 +434,7 @@ class Player {
                 Loop parse, A_LoopReadLine, ":"
                 {
                     this.sneakTime := A_LoopField
+                    playerLogger.sendLog("player.ahk\Player\loadFromFile\sneakTime: " this.sneakTime)
                 }
             }
         
@@ -354,6 +443,7 @@ class Player {
                 Loop parse, A_LoopReadLine, ":"
                 {
                     this.walkTime := A_LoopField
+                    playerLogger.sendLog("player.ahk\Player\loadFromFile\walkTime: " this.walkTime)
                 }
             }
         }
@@ -361,11 +451,13 @@ class Player {
         if(this.sneakTime = "")
         {
             this.sneakTime := 772
+            playerLogger.sendLog("player.ahk\Player\loadFromFile\sneakTime: set to default")
         }
 
-        if(this.sneakTime = "")
+        if(this.walkTime = "")
         {
             this.sneakTime := 231
+            playerLogger.sendLog("player.ahk\Player\loadFromFile\walkTime: set to default")
         }
     }
 }

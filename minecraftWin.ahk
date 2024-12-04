@@ -1,6 +1,8 @@
 #Requires AutoHotkey v2.0
 #Include coordinates.ahk
 #Include facing.ahk
+#Include logger.ahk
+windowLogger := Logger("minecraftWin.ahk")
 CoordMode "Pixel", "Client"
 
 /******************************************************
@@ -37,12 +39,13 @@ class MinecraftWin {
                 this.xyz := Coordinates(this.xyz.x, this.xyz.y + 18, 0)
                 this.facingCoords := Coordinates(this.xyz.x + 76, this.xyz.y + 54, 0)
             }
-        } 
+        }
+        windowLogger.sendLog("MinecraftWin.ahk\MinecraftWin\New\ Minecraft Window Object Created")
     }
     
     readChar(coordsToRead, textColor)
     {
-        ;OutputDebug "READSCREEN`ncoordsToRead: " coordsToRead.ToString() "`n"
+        windowLogger.sendLog("MinecraftWin.ahk\MinecraftWin\readChar\ reading character at coordinates: " coordsToRead.ToString())
 
         ;arrays of the pixels in various letters and numbers
         ;0 is no pixel, 1 is a lit pixel, 2 can be either lit or until  
@@ -267,7 +270,7 @@ class MinecraftWin {
         if(isMinusSign)
             output := "-"
 
-        ;OutputDebug "output: " output "`n`n"
+        windowLogger.sendLog("MinecraftWin.ahk\MinecraftWin\readChar\ Character Read: " output)
         return output
     }
 
@@ -378,7 +381,7 @@ class MinecraftWin {
             MsgBox "Unable to read the Minecraft Debug Screen!", "ERROR", "Iconx"
             ExitApp
         }
-        OutputDebug "Window has been set up`n"
+        windowLogger.sendLog("MinecraftWin.ahk\MinecraftWin\setUpWindow\ Minecraft Window Set")
     }
 
     /****************************************************
@@ -398,9 +401,6 @@ class MinecraftWin {
         xValues := Array()
         yValues := Array()
         zValues := Array()
-
-        OutputDebug "`n----------------`nGET COORDS START`n"
-        OutputDebug "topLeftCoords: " topLeftCoords.ToString() "`n----------------`n"
 
         /*quit loop 0 assigns the x value
         1 assigns y, 2 assigns z, 3 quits the loop */
@@ -523,8 +523,7 @@ class MinecraftWin {
 
         output := Coordinates(xIn, yIn, zIn)
 
-        OutputDebug "`n----------------`nGETCOORDS END`n"
-        OutputDebug "output coordinates: " output.ToString() "`n----------------`n"
+        windowLogger.sendLog("MinecraftWin.ahk\MinecraftWin\getCoords\ Returning Coordinates: " output.ToString())
         return output
     }
 
@@ -534,7 +533,6 @@ class MinecraftWin {
      *****************************************************/
     getFacing()
     {
-        OutputDebug "`n---------------`nGET FACING`n"
         textWidth := 5
         textHeight := 7
         yawIsNegative := 1.0
@@ -562,10 +560,6 @@ class MinecraftWin {
             MsgBox("Unable to read direction", "ERROR", "Iconx")
             ExitApp
         }
-
-        OutputDebug "Facing: " direction.cardinalDir "`n"
-
-        ;N 373  S 365  E 353  W 361
 
         /*quit loop 0 assigns the yaw
         1 assigns pitch, 2 quits the loop */
@@ -658,10 +652,7 @@ class MinecraftWin {
         }
         pitchIn := pitchIn * pitchIsNegative
 
-        
-
-        ;OutputDebug "`n----------------`nGETCOORDS END`n"
-        OutputDebug "output facing`n" direction.ToString() "`n----------------`n"
+        windowLogger.sendLog("MinecraftWin.ahk\MinecraftWin\getFacing\ Returning Facing: " direction.ToString())
        
         direction.yaw := yawIn
         direction.pitch := pitchIn

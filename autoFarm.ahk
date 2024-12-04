@@ -7,6 +7,8 @@
 #Include facing.ahk
 #Include player.ahk
 #Include farm.ahk
+#Include logger.ahk
+autoFarmLogger := Logger("autoFarm.ahk")
 
 /*********************************************************
 * GET NEXT ROW
@@ -16,9 +18,8 @@
 **********************************************************/
 getNextRow(currentRow, facingData)
 {
+    autoFarmLogger.sendLog("autoFarm.ahk\getNextRow\ currentRow: " currentRow.ToString())
     nextRow := Coordinates()
-    
-    ;OutputDebug "`n---------------`nGETNEXTROW`nCurrent Row: " currentRow.ToString() "`nFacing: " steve.direction.cardinalDir "`n"
      
     if(facingData.cardinalDir = "n")
     {
@@ -40,8 +41,8 @@ getNextRow(currentRow, facingData)
         nextRow := Coordinates(currentRow.x, currentRow.y, currentRow.z - 1)
     }
     
-    ;OutputDebug "nextRowCoords: " nextRow.ToString() "`n------------------`n"
     nextRow := nextRow.centerCoordinates()
+    autoFarmLogger.sendLog("autoFarm.ahk\getNextRow\ nextRow: " nextRow.ToString())
     return nextRow
 }
 
@@ -51,6 +52,7 @@ getNextRow(currentRow, facingData)
 ***********************************************/
 *x::
 {
+    autoFarmLogger.sendLog("autoFarm.ahk\*x\ Script Cancelled")
     Send "{Shift up}"
     MsgBox "Script Cancelled"
     ExitApp
@@ -62,18 +64,19 @@ getNextRow(currentRow, facingData)
  ************************************************/
 *p::
 {
-    OutputDebug "PAUSED`n"
+    autoFarmLogger.sendLog("autoFarm.ahk\*p\ Script Paused")
     Pause -1
     result := MsgBox("Would you like to continue? If you cancel, you will have to start the script over.", "Paused", "YesNo")
     if (result = "Yes")
     {
-        OutputDebug "UNPAUSED`n"
+        autoFarmLogger.sendLog("autoFarm.ahk/*p: Script Resumed")
         ;setUpWindow()
         Pause -1
     }
 
     else
     {
+        autoFarmLogger.sendLog("autoFarm.ahk\*p\ Script Cancelled")
         Send "{Shift up}"
         MsgBox "Script Cancelled"
         ExitApp
@@ -88,7 +91,7 @@ if(result = "Cancel")
 }
 
 CoordMode "Pixel", "Client"
-steve := Player()
+steve := Player() ;the player charachter
 theFarm := Farm() ;all of the settings for the farm
 
 initialCoords := steve.setGetPosition() ;coordinates where the player starts
@@ -97,13 +100,9 @@ initialCoords := steve.setGetPosition() ;coordinates where the player starts
 ;completes the harvest, storage, and replanting process for all layers
 loop theFarm.layers
 {
-    ;center player on the initial coordinates
-    ;centerPlayer(initialCoords, steve.sneakTime, steve.walkTime, steve.direction, xyzCoords)
-    OutputDebug "Player centered on initial coordinates:" initialCoords.ToString() "`n"
-
     currentRowCoords := initialCoords ;coordinates of the row currently being harvested
     nextRowCoords := getNextRow(currentRowCoords, steve.direction)
-
+    steve.moveTo(currentRowCoords)
     sectionsCount := 0
     rowCount := 0
     
@@ -111,14 +110,15 @@ loop theFarm.layers
     loop theFarm.sectionsPerLayer {
         sectionsCount += 1
         rowCount := 0
-        OutputDebug "starting section " sectionsCount "`n"
+
+        autoFarmLogger.sendLog("autoFarm.ahk\ starting section " sectionsCount)
         
         ;harvests and deposits a single section
         loop theFarm.rowsPerSection
         {
             rowCount += 1
 
-            OutputDebug "harvesting row " rowCount "`n"
+            autoFarmLogger.sendLog("autoFarm.ahk\ harvesting row " rowCount)
             ;harvests one row
             loop theFarm.rowLength
             {
@@ -128,20 +128,16 @@ loop theFarm.layers
                 click "Right"
                 sleep 200
             }
-            
-            OutputDebug "row " rowCount " harvested`n"
 
             ;if on the last row of the section, deposit in the chest on the current row
             if(rowCount = theFarm.rowsPerSection)
             {
-                OutputDebug "going to current row`n"
                 steve.moveTo(currentRowCoords)
             }
 
             ;send to next row to deposit, don't need to get coordinates as often this way
             else
             {
-                OutputDebug "going to next row: " nextRowCoords.ToString() "`n"
                 steve.moveTo(nextRowCoords)
             }
             
@@ -152,10 +148,16 @@ loop theFarm.layers
             currentRowCoords := getNextRow(currentRowCoords, steve.direction)
             nextRowCoords := getNextRow(currentRowCoords, steve.direction)
         }
-        ;moves the current row over one block to the right, moves player to next section
+        ;moves the current row over one block to the right, the next section
         currentRowCoords := getNextRow(currentRowCoords, steve.direction)
-        nextRowCoords := getNextRow(currentRowCoords, steve.direction) 
-        steve.moveTo(currentRowCoords)
+        nextRowCoords := getNextRow(currentRowCoords, steve.direction)
+
+        ;move to next section unless on the last section
+        if(sectionsCount != theFarm.sectionsPerLayer)
+        {
+            steve.moveTo(currentRowCoords)
+        }
+        
     }
     ;sets the current row to the stairwell and moves there
     currentRowCoords := getNextRow(currentRowCoords, steve.direction)
@@ -165,5 +167,6 @@ loop theFarm.layers
     steve.walk("d", 2)
     steve.walk("s", 6)
 }
+autoFarmLogger.sendLog("autoFarm.ahk\ Harvest Complete OwO")
 MsgBox "Harvest Complete OwO"
 ExitApp

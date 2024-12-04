@@ -1,3 +1,5 @@
+#Include logger.ahk
+coordLogger := Logger("coordinates.ahk")
 /******************************************************
  * COORDINATES
  * A class which can save an x, y, z coordinate
@@ -11,6 +13,7 @@ class Coordinates {
         this.x := x
         this.y := y
         this.z := z
+        coordLogger.sendLog("coordinates.ahk\Coordinates\New: (" this.x ", " this.y ", " this.z ")")
     }
     
     ; this method is used by the String class and is useful for printing/msg boxes
@@ -25,7 +28,7 @@ class Coordinates {
      ****************************************************/
     centerCoordinates()
     {
-        ;OutputDebug "`n-----------------`nCENTER COORDINATES`ninputCoords: " inputCoords.ToString() "`n"
+        coordLogger.sendLog("coordinates.ahk\Coordinates\centerCoordinates: centering " this.ToString())
 
         outputCoords := Coordinates()
         roundedX := 0.0
@@ -72,7 +75,7 @@ class Coordinates {
 
         outputCoords := Coordinates(centeredX, centeredY, centeredZ)
 
-        ;OutputDebug "outputCoords: " outputCoords.ToString() "`n-------------------`n"
+        coordLogger.sendLog("coordinates.ahk\Coordinates\centerCoordinates: centered to " outputCoords.ToString())
 
         return outputCoords
     }
