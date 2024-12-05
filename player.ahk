@@ -108,57 +108,52 @@ class Player
     moveTo(targetCoords)
     {
         playerLogger.sendLog("player.ahk\Player\moveTo\ Moving player to " targetCoords.ToString())
-
-        ;sets the current coordinates
-        this.position := this.minecraft.getCoords()
-        currentCoordsCenter := this.position.centerCoordinates()
-        targetCoordsCenter := targetCoords.centerCoordinates()
+        this.centerOn()
+        currentCoordsCenter := this.position.centerCoordinates() ;the coordinates of the center of the target block, 0.5 mark
+        targetCoordsCenter := targetCoords.centerCoordinates() ;center of the target coordinates block 0.5
         arrived := 0
-
 
         ;take the player to the correct coordinates
         if(targetCoordsCenter.x != currentCoordsCenter.x or targetCoordsCenter.z != currentCoordsCenter.z)
         { 
             while(arrived = 0)
             {
-                this.centerOn()
+                if(targetCoords.x = currentCoordsCenter.x and targetCoords.z = currentCoordsCenter.z)
+                {
+                    this.centerOn()
+                    arrived := 1
+                }
 
-                if(targetCoords.x > currentCoordsCenter.x)
+                else if(targetCoords.x > currentCoordsCenter.x)
                 {
                     this.walk(this.direction.positiveX, targetCoords.x - currentCoordsCenter.x)
-                    this.position := this.minecraft.getCoords()
+                    this.centerOn()
                     currentCoordsCenter := this.position.centerCoordinates()
                 }
             
                 else if(targetCoords.x < currentCoordsCenter.x)
                 {
                     this.walk(this.direction.negativeX, currentCoordsCenter.x - targetCoords.x)
-                    this.position := this.minecraft.getCoords()
+                    this.centerOn()
                     currentCoordsCenter := this.position.centerCoordinates()
                 }
             
                 if(targetCoords.z > currentCoordsCenter.z)
                 {
                     this.walk(this.direction.positiveZ, targetCoords.z - currentCoordsCenter.z)
-                    this.position := this.minecraft.getCoords()
+                    this.centerOn()
                     currentCoordsCenter := this.position.centerCoordinates()
                 }
                     
                 else if(targetCoords.z < currentCoordsCenter.z)
                 {
                     this.walk(this.direction.negativeZ, currentCoordsCenter.z - targetCoords.z)
-                    this.position := this.minecraft.getCoords()
+                    this.centerOn()
                     currentCoordsCenter := this.position.centerCoordinates()
-                }
-
-                if(targetCoords.x = currentCoordsCenter.x and targetCoords.z = currentCoordsCenter.z)
-                {
-                    arrived := 1
                 }
             }
         }
 
-        this.centerOn()
         playerLogger.sendLog("player.ahk\Player\moveTo\ Moved player to " this.position.ToString())
     }
 
@@ -169,6 +164,7 @@ class Player
      ***********************************************/
     centerOn()
     {
+        playerLogger.sendLog("player.ahk\Player\centerOn\ Centering player on coordinates " this.position.ToString())
          ;sets the current coordinates
          this.position := this.minecraft.getCoords()
 
