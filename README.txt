@@ -1,7 +1,7 @@
 ~~~~~~~~~~~~~ Auto Farm ~~~~~~~~~~~~~
  An Auto Hot Key Version 2 script that will
  harvest and replant a field of
- crops in Minecraft
+ crops in unmodded, vanilla Minecraft
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *************************
@@ -76,6 +76,8 @@ rowLength: The length of each row. In the diagram above, this would be 10. All t
 sneakTime: The time in milliseconds that it takes for your character to move one block while crouching, aka sneaking. If ommitted defaults to 772. *see note below
 
 walkTime: The time in milliseconds that it takes for your character to move one block while walking. If ommitted defaults to 231. *see note below
+
+startHour and startMinute: the start time (military time) that you want the script to start at. If left blank, it will default to starting immediately after you press the start button on the welcome window
 
 windowName: The name of the Minecraft window. This can usually be found in the title bar of the window (ie. Minecraft 1.21.1 - Singleplayer). If omitted, the program will search for an open window with "Minecraft" at the beginning of the title.
 

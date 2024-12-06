@@ -90,9 +90,55 @@ if(result = "Cancel")
     ExitApp
 }
 
+
+
+
 CoordMode "Pixel", "Client"
 steve := Player() ;the player charachter
 theFarm := Farm() ;all of the settings for the farm
+
+;waits until the start time to run the harvest process if a start time was included in the settings.txt file
+if(theFarm.startHour != -1 and theFarm.startMinute != -1)
+{  
+    currentHour := Integer(FormatTime(, "H"))
+    currentMinute := Integer(FormatTime(, "m"))
+
+    sleepTime := 0
+
+    if(theFarm.startHour < 0 or theFarm.startHour > 23 or theFarm.startMinute < 0 or theFarm.startMinute > 59)
+    {
+        MsgBox "Invalid start time, quitting script"
+        ExitApp
+    }
+
+    hourStartOffset := theFarm.startHour ;used to caluclate the miliseconds to sleep for
+    if(currentMinute > theFarm.startMinute) 
+    {
+        hourStartOffset -= 1
+        sleepTime := (60 - currentMinute + theFarm.startMinute) * 60000
+    }
+
+    else
+    {
+        sleepTime := (theFarm.startMinute - currentMinute) * 60000
+    }
+
+    if(currentHour < theFarm.startHour)  
+    {
+        sleepTime += (hourStartOffset - currentHour) * 3600000
+    } 
+
+    else if(currentHour > theFarm.startHour)
+    {
+        sleepTime += (24 - currentHour + hourStartOffset) * 3600000
+    }
+
+    autoFarmLogger.sendLog("autoFarm.ahk\ Sleeping for " sleepTime " milliseconds and starting at " theFarm.startHour ":" theFarm.startMinute)
+    sleep sleepTime
+    
+}
+
+autoFarmLogger.sendLog("autoFarm.ahk\ Starting Harvest")
 
 initialCoords := steve.setGetPosition() ;coordinates where the player starts
 ;initialFacing := steve.setGetDirection() ;the players beginning facing data

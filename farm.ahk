@@ -12,11 +12,13 @@ class Farm {
     settingsFile := "settings.txt"
 
     ; this method is called when a new instance is created 
-    __New(layers := 0, sectionsPerLayer := 0, rowsPerSection := 0, rowLength := 0) {
+    __New(layers := 0, sectionsPerLayer := 0, rowsPerSection := 0, rowLength := 0, startHour := -1, startMinute := -1) {
         this.layers := layers ;the number of layers on the farm
         this.sectionsPerLayer := sectionsPerLayer ;the number of sections in each layer
         this.rowsPerSection := rowsPerSection ;the numbers of rows in each section
         this.rowLength := rowLength ;the length of the rows
+        this.startHour := startHour ;the hour when the script will start harvesting the farm
+        this.startMinute := startMinute ;the minute when the script will start harvesting the farm
         this.loadFromFile()
         farmLogger.sendLog("farm.ahk\Farm\New\ Farm object created")
     }
@@ -63,6 +65,24 @@ class Farm {
                 {
                     this.rowLength := A_LoopField
                     farmLogger.sendLog("farm.ahk\Farm\loadFromFile\ rowLength: " this.rowLength)
+                }
+            }
+
+            if InStr(A_LoopReadLine, "startHour")
+            {
+                Loop parse, A_LoopReadLine, ":"
+                {
+                    this.startHour := A_LoopField
+                    farmLogger.sendLog("farm.ahk\Farm\loadFromFile\ startHour: " this.startHour)
+                }
+            }
+
+            if InStr(A_LoopReadLine, "startMinute")
+            {
+                Loop parse, A_LoopReadLine, ":"
+                {
+                    this.startMinute := A_LoopField
+                    farmLogger.sendLog("farm.ahk\Farm\loadFromFile\ startMinute: " this.startMinute)
                 }
             }
         }
