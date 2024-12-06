@@ -43,6 +43,15 @@ class MinecraftWin {
         windowLogger.sendLog("MinecraftWin.ahk\MinecraftWin\New\ Minecraft Window Object Created")
     }
     
+    /******************************************
+     * READ CHARATCTER
+     * Reads a single charachter from the minecraft screen
+     * by reading the color of the pixels in a 
+     * 10x14 pixel area, skipping over every other pixel
+     * coordsToRead: the upper left corner of the area that will
+     *               be read
+     * textColor: the color of the text that is being read 
+     ******************************************/
     readChar(coordsToRead, textColor)
     {
         windowLogger.sendLog("MinecraftWin.ahk\MinecraftWin\readChar\ reading character at coordinates: " coordsToRead.ToString())
@@ -274,6 +283,239 @@ class MinecraftWin {
         return output
     }
 
+    /*****************************************
+     * READ CHARACHTER NUMBER
+     * Similar to the READ CHARACTER method, but only
+     * for reading numbers. It is more efficient than readChar()
+     * coordsToRead: the upper left corner of the number that will be read
+     * textColor: the color of the text that is being read
+     *****************************************/
+    readCharNum(coordsToRead, textColor)
+    {
+        windowLogger.sendLog("MinecraftWin.ahk\MinecraftWin\readCharNum\ reading character at coordinates: " coordsToRead.ToString())
+
+        ;arrays of the pixels in various letters and numbers
+        ;0 is no pixel, 1 is a lit pixel, 2 can be either lit or until  
+   
+        ;arrays for the first round of elimination, bottom left corner
+        minusFourSeven := [0, 0, 0, 0]
+        nine := [0, 0, 0, 1]
+        period := [0, 0, 1, 0]
+        one := [0, 0, 1, 1]
+        zeroThreeFiveSixEight := [1, 0, 0, 1]
+        two := [1, 0, 1, 1]
+
+        ;arrays for the second rounds of elimination, 6 pixels down
+        seven := [0, 0]
+        four := [1, 0]
+        minusSign := [1, 1]
+
+        ;arrays for second rounds of elimination, 4 pixels down
+        three := [0, 0, 0, 0]
+        eight := [1, 0, 0, 1]
+        zero := [1, 0, 1, 0]
+        six := [1, 0, 1, 1]
+        five := [1, 1, 0, 0]
+
+
+        ;an array of the pixels read from the screen, first and second round
+        pixelsReadFirst := []
+        pixelsReadSecond := []
+
+        ;first elmination round
+        pixelToRead := Coordinates(coordsToRead.x, coordsToRead.y + 10, 0)
+        ;gets the columns of pixels
+        loop 2
+        {
+            ;gets the rows of pixels
+            loop 2
+            {
+                pixelColor := PixelGetColor(pixelToRead.x, pixelToRead.y)
+                if (pixelColor = textColor)
+                {
+                    pixelsReadFirst.Push(1)
+                }
+
+                else
+                {
+                    pixelsReadFirst.Push(0)
+                }
+    
+                pixelToRead.x += 2
+            }
+            pixelToRead.y += 2
+            pixelToRead.x := coordsToRead.x
+        }
+
+        isMinusFourSeven := 1
+        isNine := 1
+        isPeriod := 1
+        isOne := 1
+        isZeroThreeFiveSixEight := 1
+        isTwo := 1
+
+        arrayIndex := 1
+        loop pixelsReadFirst.Length
+        {
+            if(one[arrayIndex] != pixelsReadFirst[arrayIndex])
+                isOne := 0
+
+            if(two[arrayIndex] != pixelsReadFirst[arrayIndex])
+                isTwo := 0
+
+            if(nine[arrayIndex] != pixelsReadFirst[arrayIndex])
+                isNine := 0
+
+            if(period[arrayIndex] != pixelsReadFirst[arrayIndex])
+                isPeriod := 0
+
+            if(minusFourSeven[arrayIndex] != pixelsReadFirst[arrayIndex])
+                isMinusFourSeven := 0
+
+            if(zeroThreeFiveSixEight[arrayIndex] != pixelsReadFirst[arrayIndex])
+                isZeroThreeFiveSixEight := 0
+
+            arrayIndex += 1
+        }
+
+        output := "no text found"
+
+        if(isOne)
+            output := 1
+
+        else if(isTwo)
+            output := 2
+
+        else if(isNine)
+            output := 9
+
+        else if(isPeriod)
+            output := "."
+        
+        ;second round of elimination
+        else if(isMinusFourSeven)
+        {
+            pixelToRead := Coordinates(coordsToRead.x, coordsToRead.y + 6, 0)
+            ;gets a row of 2 pixels
+            loop 2
+            {
+                pixelColor := PixelGetColor(pixelToRead.x, pixelToRead.y)
+                if (pixelColor = textColor)
+                {
+                    pixelsReadSecond.Push(1)
+                }
+
+                else
+                {
+                    pixelsReadSecond.Push(0)
+                }
+    
+                pixelToRead.x += 2
+            }
+
+            isMinusSign := 1
+            isFour := 1
+            isSeven := 1
+            arrayIndex := 1
+
+            loop pixelsReadSecond.Length
+            {
+                if(minusSign[arrayIndex] != pixelsReadSecond[arrayIndex])
+                    isMinusSign := 0
+    
+                if(four[arrayIndex] != pixelsReadSecond[arrayIndex])
+                    isFour := 0
+    
+                if(seven[arrayIndex] != pixelsReadSecond[arrayIndex])
+                    isSeven := 0
+    
+                arrayIndex += 1
+            }
+
+            if(isMinusSign)
+                output := "-"
+    
+            else if(isFour)
+                output := 4
+    
+            else if(isSeven)
+                output := 7
+        }
+
+        ;second round of elimination
+        else if(isZeroThreeFiveSixEight)
+        {
+            pixelToRead := Coordinates(coordsToRead.x, coordsToRead.y + 4, 0)
+            ;gets the columns of pixels
+            loop 2
+            {
+                ;gets the rows of pixels
+                loop 2
+                {
+                    pixelColor := PixelGetColor(pixelToRead.x, pixelToRead.y)
+                    if (pixelColor = textColor)
+                    {
+                        pixelsReadSecond.Push(1)
+                    }
+
+                    else
+                    {
+                        pixelsReadSecond.Push(0)
+                    }
+        
+                    pixelToRead.x += 2
+                }
+                pixelToRead.y += 2
+                pixelToRead.x := coordsToRead.x
+            }
+
+            isZero := 1
+            isThree := 1
+            isFive := 1
+            isSix := 1
+            isEight := 1
+            arrayIndex := 1
+            
+            loop pixelsReadFirst.Length
+            {
+                if(zero[arrayIndex] != pixelsReadSecond[arrayIndex])
+                    isZero := 0
+    
+                if(three[arrayIndex] != pixelsReadSecond[arrayIndex])
+                    isThree := 0
+    
+                if(five[arrayIndex] != pixelsReadSecond[arrayIndex])
+                    isFive := 0
+    
+                if(six[arrayIndex] != pixelsReadSecond[arrayIndex])
+                    isSix := 0
+    
+                if(eight[arrayIndex] != pixelsReadSecond[arrayIndex])
+                    isEight := 0
+    
+                arrayIndex += 1
+            }
+
+            if(isZero)
+                output := 0
+    
+            else if(isThree)
+                output := 3
+    
+            else if(isFive)
+                output := 5
+    
+            else if(isSix)
+                output := 6
+
+            else if(isEight)
+                output := 8
+        }
+
+        windowLogger.sendLog("MinecraftWin.ahk\MinecraftWin\readCharNum\ Character Read: " output)
+        return output
+    }
+
     /**********************************************************
      * Resizes the minecraft window, exits the menu if opened
      * and makes sure the debug screen is opened
@@ -409,7 +651,7 @@ class MinecraftWin {
         {
 
             ;the number that is to be added to the coordinates
-            numToPush := this.readChar(topLeftCoords, this.debugTextColor)
+            numToPush := this.readCharNum(topLeftCoords, this.debugTextColor)
 
             ;check to see if there is a decimal and adjst x coordinate to read the
             ;number, not the decimal
@@ -417,7 +659,7 @@ class MinecraftWin {
             if (numToPush = ".")
             {
                 topLeftCoords.x += 4
-                numToPush := this.readChar(topLeftCoords, this.debugTextColor)
+                numToPush := this.readCharNum(topLeftCoords, this.debugTextColor)
                 goToNextCoord := 1
             }
 
@@ -568,14 +810,14 @@ class MinecraftWin {
         {
 
             ;the number that is to be added
-            numToPush := this.readChar(topLeftCoords, this.debugTextColor)
+            numToPush := this.readCharNum(topLeftCoords, this.debugTextColor)
             ;check to see if there is a decimal and adjst x coordinate to read the
             ;number, not the decimal
             goToNextCoord := 0 ;tells the loop to 
             if (numToPush = ".")
             {
                 topLeftCoords.x += 4
-                numToPush := this.readChar(topLeftCoords, this.debugTextColor)
+                numToPush := this.readCharNum(topLeftCoords, this.debugTextColor)
                 goToNextCoord := 1
             }
 

@@ -48,7 +48,6 @@ steve := Player()
 /****************************************
  * YOUR CODE HERE
  ****************************************/
-OutputDebug steve.position.ToString() "`n"
-steve.sneak(steve.sneakTime / 32, 'w', 1)
+
 
 ExitApp
