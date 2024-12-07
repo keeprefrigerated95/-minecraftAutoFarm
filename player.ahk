@@ -118,7 +118,7 @@ class Player
         { 
             while(arrived = 0)
             {
-                if(targetCoords.x = currentCoordsCenter.x and targetCoords.z = currentCoordsCenter.z)
+                if(Integer(targetCoords.x) = Integer(this.position.x) and Integer(targetCoords.z) = Integer(this.position.z))
                 {
                     this.centerOn()
                     arrived := 1
