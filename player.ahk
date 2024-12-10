@@ -379,17 +379,55 @@ class Player
      **********************************************/
     turn(targetYaw, targetPitch)
     {
+        playerLogger.sendLog("Turning player to (" targetYaw ", " targetPitch ")")
         ;yaw -180 to 180
         ;pitch -90 to 90
 
-        ;set pitch to 0
-        loop 10
-            MouseMove(0, -1, 100, "R")
+        ;does nothing
+        ;MouseMove(0, -1, 100, "R")
+
+        ;does nothing
+        ;MouseMove(0, -10, 100, "R")
+
+        ;does nothing
+        ;MouseMove(0, -1, 50, "R")
+
+        ;does nothing
+        ;MouseMove(0, -1,, "R")
+
+        ;moves camera up about 82 degrees
+        ;loop 10
+        ;    MouseMove(0, -1, 100, "R")
         
+        ;moves camera up 37 degrees
+        ;loop 5
+            ;MouseMove(0, -1, 100, "R")
+
+        ;moves camera up about 91 degrees 
+        ;loop 11
+            ;MouseMove(0, -1, 100, "R")
+
+        ;moves camera up 27 degrees
+        ;loop 3
+            ;MouseMove(0, -1, 100, "R")
+
+        ;moves camera up 19 degrees
+        ;loop 3
+            ;MouseMove(0, -1,, "R")
+
+        ;moves camera up 9.2 degrees
+        ;loop 2
+            ;MouseMove(0, -1,, "R")
+
+        ;moves camera up 81.9 degrees
+        ;loop 10
+        ;    MouseMove(0, -1,, "R")
+
+        /*
         exitLoop := 0
         while(exitLoop = 0)
         {
-            /*
+            
             if(this.direction.pitch > 75)
             {
                 loop 5
@@ -398,6 +436,7 @@ class Player
             }
             */
            ;currently makes the player look up 90 degrees
+           /*
             if(this.direction.pitch > 0)
             {
                 loop 1
@@ -408,7 +447,7 @@ class Player
             if(this.direction.pitch < 5)
                 exitLoop := 1
         }
-        
+        */
 
         ;set to targetYaw
 
